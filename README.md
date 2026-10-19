@@ -4,6 +4,10 @@ Jeden skript pro Tampermonkey sdružuje úpravy vzhledu i hledání volných ter
 
 ## První instalace nebo aktualizace
 
+Možnost použít průvodce instalací Fyzion+:  https://bruhaedwin.github.io/Fyzion_upravy/
+
+Manuální postup:
+
 1. Ponechte si zálohu původního skriptu a export Stylusu.
 2. V Tampermonkey otevřete existující pomocník Fyzionu, nahraďte celý obsah souborem `fyzion-helper.user.js` z tohoto balíčku a uložte. Nespouštějte dvě kopie pomocníka současně.
 3. Ve Stylusu vypněte původní styly pro Fyzion (včetně společného stylu instalovaného z GitHubu). Nemažte je, dokud novou verzi neověříte. Jinak mohou zůstat jejich pravidla aktivní i při vypnutém přepínači ve Fyzion+.
