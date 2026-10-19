@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Fyzion +
+// @name         Fyzion+
 // @namespace    local.fyzion.helpers
-// @version      1.1.0
+// @version      1.6.1
 // @updateURL    https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js
 // @downloadURL  https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js
 // @homepageURL  https://github.com/bruhaedwin/Fyzion_upravy
@@ -53,7 +53,7 @@
   function availabilityOnly(values) {
     return values.map(e => ({ start: e.start, end: e.end, resourceId: e.resourceId,
       resourceIds: e.resourceIds, display: e.display, recurrence_settings: e.recurrence_settings,
-      extendedProps: { user_id: e.extendedProps?.user_id } }));
+      extendedProps: { user_id: e.extendedProps?.user_id, event_type: e.extendedProps?.event_type } }));
   }
   async function loadRange({ date, days, resourceId, getEvents, check = () => {}, progress = () => {} }) {
     const chunks = rangeChunks(date, days), events = [];
@@ -131,11 +131,24 @@
     }
     throw Error('Termín je příliš daleko od otevřeného kalendáře.');
   }
+  function workRules(resource) {
+    const name=String(resource.title||resource.id||'Terapeut');
+    if(!Array.isArray(resource.businessHours))throw Error(`${name}: chybí pracovní rozvrh.`);
+    const rules=[];
+    for(const rule of resource.businessHours){
+      if(!rule||!Array.isArray(rule.daysOfWeek))throw Error(`${name}: neočekávaný seznam pracovních dnů (${JSON.stringify(rule?.daysOfWeek)??'chybí'}).`);
+      if(!rule.daysOfWeek.length)continue;
+      const days=rule.daysOfWeek.map(d=>typeof d==='string'&&/^[0-6]$/.test(d)?Number(d):d);
+      if(days.some(d=>!Number.isInteger(d)||d<0||d>6))throw Error(`${name}: neplatné dny pracovního rozvrhu (${JSON.stringify(rule.daysOfWeek).slice(0,100)}).`);
+      rules.push({...rule,daysOfWeek:days});
+    }
+    return rules;
+  }
   function findSlots({ resource, events, from, to, duration, now = Date.now(), limit = 150 }) {
     if (!Number.isInteger(duration) || duration < 1 || duration > 480) throw Error('Délka musí být 1–480 minut.');
     if (!(from < to) || to - from > 90 * 86400000 + 3600000) throw Error('Podporované období je nejvýše 90 dnů.');
     if (!Array.isArray(resource.businessHours)) throw Error('Chybí pracovní rozvrh terapeuta.');
-    const rules = resource.businessHours;
+    const rules = workRules(resource);
     for (const r of rules) {
       if (!r || Object.keys(r).some(k => !['daysOfWeek', 'startTime', 'endTime', 'resourceId'].includes(k)))
         throw Error('Pracovní rozvrh obsahuje neověřená omezení.');
@@ -197,15 +210,18 @@
     return { slots: slots.slice(0, limit), more: more || slots.length > limit };
   }
   const PLUS_TIME_CSS = "/* Fyzion: casy pod udalostmi a nepruhlednym volnem.\n   Zkusebni varianta pro osu 00:00-24:00 po 15 minutach.\n   Pridat do existujiciho stylu omezeneho na web Fyzionu. */\n.fc:has(.fc-timegrid-slots tr:first-child [data-time=\"00:00:00\"]):has(.fc-timegrid-slots tr:last-child [data-time=\"23:45:00\"]):has(.fc-timegrid-slots tr:nth-child(96):last-child) .fc-timegrid-col:not(.fc-timegrid-axis) .fc-timegrid-col-frame::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  z-index: 0;\n  pointer-events: none;\n  background-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%222765%22%20viewBox%3D%220%200%20240%202765%22%20preserveAspectRatio%3D%22none%22%3E%3Cg%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2210%22%20fill%3D%22%23777777%22%3E%3Ctext%20x%3D%226%22%20y%3D%2212%22%3E00%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2240.802%22%3E00%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2269.604%22%3E00%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2298.406%22%3E00%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22127.208%22%3E01%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22156.01%22%3E01%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22184.812%22%3E01%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22213.615%22%3E01%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22242.417%22%3E02%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22271.219%22%3E02%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22300.021%22%3E02%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22328.823%22%3E02%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22357.625%22%3E03%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22386.427%22%3E03%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22415.229%22%3E03%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22444.031%22%3E03%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22472.833%22%3E04%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22501.635%22%3E04%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22530.437%22%3E04%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22559.24%22%3E04%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22588.042%22%3E05%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22616.844%22%3E05%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22645.646%22%3E05%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22674.448%22%3E05%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22703.25%22%3E06%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22732.052%22%3E06%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22760.854%22%3E06%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22789.656%22%3E06%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22818.458%22%3E07%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22847.26%22%3E07%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22876.062%22%3E07%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22904.865%22%3E07%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22933.667%22%3E08%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22962.469%22%3E08%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22991.271%22%3E08%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221020.073%22%3E08%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221048.875%22%3E09%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221077.677%22%3E09%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221106.479%22%3E09%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221135.281%22%3E09%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221164.083%22%3E10%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221192.885%22%3E10%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221221.687%22%3E10%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221250.49%22%3E10%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221279.292%22%3E11%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221308.094%22%3E11%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221336.896%22%3E11%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221365.698%22%3E11%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221394.5%22%3E12%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221423.302%22%3E12%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221452.104%22%3E12%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221480.906%22%3E12%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221509.708%22%3E13%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221538.51%22%3E13%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221567.312%22%3E13%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221596.115%22%3E13%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221624.917%22%3E14%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221653.719%22%3E14%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221682.521%22%3E14%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221711.323%22%3E14%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221740.125%22%3E15%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221768.927%22%3E15%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221797.729%22%3E15%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221826.531%22%3E15%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221855.333%22%3E16%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221884.135%22%3E16%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221912.937%22%3E16%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221941.74%22%3E16%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221970.542%22%3E17%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221999.344%22%3E17%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222028.146%22%3E17%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222056.948%22%3E17%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222085.75%22%3E18%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222114.552%22%3E18%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222143.354%22%3E18%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222172.156%22%3E18%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222200.958%22%3E19%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222229.76%22%3E19%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222258.562%22%3E19%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222287.365%22%3E19%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222316.167%22%3E20%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222344.969%22%3E20%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222373.771%22%3E20%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222402.573%22%3E20%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222431.375%22%3E21%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222460.177%22%3E21%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222488.979%22%3E21%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222517.781%22%3E21%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222546.583%22%3E22%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222575.385%22%3E22%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222604.187%22%3E22%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222632.99%22%3E22%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222661.792%22%3E23%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222690.594%22%3E23%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222719.396%22%3E23%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222748.198%22%3E23%3A45%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E\");\n  background-repeat: no-repeat;\n background-size: 240px 100%;\nbackground-position: left top;\n}";
-  const PLUS_VERSION = '1.1.0';
+  const PLUS_VERSION = '1.6.1';
   const PLUS_KEY = 'fyzion-plus-preferences-v1';
-  const PLUS_DEFAULTS = Object.freeze({contrast:true,hidePopup:true,timeLabels:true,hideVisitStatus:true,hatch:true,
+  const SERIES_SPACING = Object.freeze({asap:'Nejbližší volné termíny',weekly:'1× týdně',twice:'2× týdně',daily:'Každý den'});
+  const PLUS_DEFAULTS = Object.freeze({firstWithin40:false,seriesSpacing:'asap',seriesModule:false,seriesCount:5,seriesSingle:true,therapistsModule:true,contrast:true,hidePopup:true,timeLabels:true,hideVisitStatus:true,hatch:true,
     offColor:'#bfc3ca',hatchColor:'#b9ddf5',duration:30,days:40,position:null});
   function validatePreferences(input) {
     if (!input || typeof input !== 'object' || Array.isArray(input)) throw Error('Neplatné nastavení.');
     if (Object.keys(input).some(k => !Object.hasOwn(PLUS_DEFAULTS,k))) throw Error('Soubor obsahuje neznámé nastavení.');
     const out = {...PLUS_DEFAULTS,...input};
-    for (const k of ['contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) if (typeof out[k] !== 'boolean') throw Error('Neplatný přepínač vzhledu.');
+    for (const k of ['firstWithin40','seriesModule','seriesSingle','therapistsModule','contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) if (typeof out[k] !== 'boolean') throw Error('Neplatný přepínač nastavení.');
+    if(!Number.isInteger(out.seriesCount)||out.seriesCount<1||out.seriesCount>30)throw Error('Počet termínů musí být 1–30.');
+    if(typeof out.seriesSpacing!=='string'||!Object.hasOwn(SERIES_SPACING,out.seriesSpacing))throw Error('Neplatný rozestup termínů.');
     for (const k of ['offColor','hatchColor']) if (!/^#[0-9a-f]{6}$/i.test(out[k])) throw Error('Neplatná barva.');
     if (![15,30,45,60].includes(out.duration) || !Number.isInteger(out.days) || out.days<1 || out.days>90) throw Error('Neplatná délka nebo rozsah hledání.');
     if (out.position !== null && (typeof out.position !== 'object' || Array.isArray(out.position) ||
@@ -231,8 +247,87 @@
     return css;
   }
 
+  function workingResources(resources, events, now = Date.now()) {
+    const date=parts(now).date, day=new Date(`${date}T12:00:00Z`).getUTCDay();
+    const from=localMs(date,'00:00:00'),to=localMs(nextDay(date),'00:00:00');
+    return resources.filter(resource=>{
+      // Stejná kontrola rozvrhu jako při hledání; neznámé rozvrhy nesmí vést k chybnému výběru.
+      const rules=workRules(resource);
+      try{findSlots({resource:{...resource,businessHours:rules},events:[],from,to,duration:1,now:from,limit:1});}
+      catch(e){throw Error(`${resource.title||resource.id||'Terapeut'}: ${e.message}`);}
+      const onShift=rules.some(r=>r.daysOfWeek.includes(day)&&
+        localMs(date,r.startTime)<=now&&now<localMs(date,r.endTime));
+      if(!onShift)return false;
+      return !events.some(e=>{
+        if(e.extendedProps?.event_type!=='time_off')return false;
+        const ids=Array.isArray(e.resourceIds)?e.resourceIds:[e.resourceId||e.extendedProps?.user_id];
+        if(ids.some(id=>typeof id!=='string'||!id))throw Error('Blokaci volna nelze přiřadit terapeutovi.');
+        if(!ids.includes(resource.id))return false;
+        const start=instant(e.start),end=instant(e.end);
+        if(start>=end)throw Error('Blokace volna má neplatný čas.');
+        return start<=now&&now<end;
+      });
+    });
+  }
+  function planSeries(slots,count,singleTherapist,spacing='asap',firstBefore=Infinity) {
+    if(!Number.isInteger(count)||count<1||count>30)throw Error('Počet termínů musí být 1–30.');
+    if(typeof singleTherapist!=='boolean')throw Error('Neplatná volba terapeuta pro sérii.');
+    if(!Object.hasOwn(SERIES_SPACING,spacing))throw Error('Neplatný rozestup termínů.');
+    if(firstBefore!==Infinity&&!Number.isFinite(firstBefore))throw Error('Neplatný limit první návštěvy.');
+    const sorted=[...slots].sort((a,b)=>a.start-b.start||String(a.title).localeCompare(String(b.title),'cs')||String(a.resourceId).localeCompare(String(b.resourceId)));
+    const groups=new Map();
+    for(const slot of sorted){
+      if(!Number.isFinite(slot.start)||!Number.isFinite(slot.end)||slot.end<=slot.start||typeof slot.resourceId!=='string'||!slot.resourceId)
+        throw Error('Série obsahuje neplatný termín.');
+      const key=singleTherapist?slot.resourceId:'combined';
+      if(!groups.has(key))groups.set(key,[]);
+      groups.get(key).push(slot);
+    }
+    const plans=[];let availableCount=0;
+    for(const candidates of groups.values()){
+      if(spacing!=='asap'){
+        const perDay=new Map();
+        for(const slot of candidates){const date=parts(slot.start).date;if(!perDay.has(date))perDay.set(date,slot);}
+        for(const anchor of perDay.keys()){
+          if(perDay.get(anchor).start>=firstBefore)continue;
+          const selected=[];
+          for(let i=0;i<count;i++){
+            const offset=spacing==='daily'?i:spacing==='weekly'?i*7:Math.floor(i/2)*7+[0,3][i%2];
+            const slot=perDay.get(addDays(anchor,offset));
+            if(!slot||selected.length&&slot.start<selected[selected.length-1].end)break;
+            selected.push(slot);
+          }
+          availableCount=Math.max(availableCount,selected.length);
+          if(selected.length===count){plans.push(selected);break;}
+        }
+        continue;
+      }
+      const days=new Set(),selected=[];
+      for(const slot of candidates){
+        if(!selected.length&&slot.start>=firstBefore)break;
+        const date=parts(slot.start).date;
+        if(days.has(date))continue;
+        if(selected.length&&slot.start<selected[selected.length-1].end)continue;
+        selected.push(slot);days.add(date);
+        if(selected.length===count)break;
+      }
+      availableCount=Math.max(availableCount,selected.length);
+      if(selected.length===count)plans.push(selected);
+    }
+    plans.sort((a,b)=>a[a.length-1].end-b[b.length-1].end||a[0].start-b[0].start||String(a[0].title).localeCompare(String(b[0].title),'cs'));
+    return{plans,availableCount};
+  }
+  function groupSlotsByDay(slots) {
+    const groups=new Map();
+    for(const slot of [...slots].sort((a,b)=>a.start-b.start||String(a.title).localeCompare(String(b.title),'cs'))){
+      const date=parts(slot.start).date;
+      if(!groups.has(date))groups.set(date,{date,slots:[],times:new Map(),therapists:new Set()});
+      const group=groups.get(date);group.slots.push(slot);group.times.set(parts(slot.start).time,slot.start);group.therapists.add(slot.resourceId);
+    }
+    return [...groups.values()].map(g=>({date:g.date,slots:g.slots,preview:[...g.times.values()].slice(0,3),moreTimes:Math.max(0,g.times.size-3),therapistCount:g.therapists.size}));
+  }
   if (typeof window === 'undefined') {
-    if (typeof module !== 'undefined') module.exports = { validatePreferences, validateBundle, makeAppearance, PLUS_DEFAULTS, findSlots, findAllSlots, localMs, arrayOf, parts, rangeChunks, loadRange, pickerPeriod, choosePickerDate };
+    if (typeof module !== 'undefined') module.exports = { groupSlotsByDay, SERIES_SPACING, planSeries, workingResources, validatePreferences, validateBundle, makeAppearance, PLUS_DEFAULTS, findSlots, findAllSlots, localMs, arrayOf, parts, rangeChunks, loadRange, pickerPeriod, choosePickerDate };
     return;
   }
   if (window.__fyzionFreeSlotsInstalled) return;
@@ -351,6 +446,76 @@
     if (response.status !== 200) throw Error(`Načítání selhalo (${response.status}). Výsledky nebyly použity.`);
     return response.json();
   }
+  async function closeTherapistMenu(combo) {
+    if(combo.getAttribute('aria-expanded')!=='true')return;
+    combo.focus();
+    for(const type of ['keydown','keyup'])combo.dispatchEvent(new KeyboardEvent(type,{key:'Escape',code:'Escape',keyCode:27,which:27,bubbles:true}));
+    await new Promise(resolve=>setTimeout(resolve,150));
+    if(combo.getAttribute('aria-expanded')==='true')for(const type of ['mousedown','mouseup','click'])
+      document.body.dispatchEvent(new MouseEvent(type,{bubbles:true,composed:true,button:0}));
+    await waitFor(()=>combo.getAttribute('aria-expanded')!=='true','Nabídku terapeutů se nepodařilo zavřít.');
+  }
+  async function setTherapistSelection(resources, desiredIds, check, progress) {
+    const names=new Map(),wanted=new Set(desiredIds);
+    for(const r of resources){
+      const name=normalize(r.title).replace(/\s+/g,' ');
+      if(!r.id||!name||names.has(name))throw Error('Seznam obsahuje nejednoznačná jména terapeutů. Výběr proveďte ručně.');
+      names.set(name,r.id);
+    }
+    const visible=e=>e.getClientRects().length>0;
+    const fields=[...document.querySelectorAll('label.q-select--multiple')].filter(e=>visible(e)&&
+      /^(terapeuti|therapists)\b/.test(normalize(e.querySelector('.q-field__native .ellipsis')?.textContent)));
+    if(fields.length!==1)throw Error('Otevřete Kalendář. Filtr terapeutů se nepodařilo jednoznačně najít.');
+    const field=fields[0],combo=field.querySelector('input[role="combobox"]');
+    if(!combo)throw Error('Chybí ovládání filtru terapeutů.');
+    let list;
+    try{
+      if(combo.getAttribute('aria-expanded')!=='true')field.querySelector('.q-field__control').click();
+      list=await waitFor(()=>{const l=document.getElementById(combo.getAttribute('aria-controls'));return l&&visible(l)&&l.querySelector('[role="option"]')?l:null;},'Nabídka terapeutů se neotevřela.');
+      let scroller=null;
+      for(let e=list;e&&e!==document.body;e=e.parentElement){
+        if(e.scrollHeight>e.clientHeight+2&&/(auto|scroll|overlay)/.test(getComputedStyle(e).overflowY)){scroller=e;break;}
+      }
+      const readOptions=()=>[...list.querySelectorAll('[role="option"]')].map(element=>{
+        const name=normalize(element.querySelector('.q-item__label')?.textContent).replace(/\s+/g,' '),id=names.get(name),selected=element.getAttribute('aria-selected');
+        if(!id)throw Error('Nabídka obsahuje neznámou položku. Výběr proveďte ručně.');
+        if(!['true','false'].includes(selected))throw Error('Nelze určit stav výběru terapeuta.');
+        return{element,id,selected:selected==='true',disabled:element.getAttribute('aria-disabled')==='true'};
+      });
+      async function scan(visit){
+        const seen=new Set();
+        if(scroller){scroller.scrollTop=0;scroller.dispatchEvent(new Event('scroll'));await new Promise(r=>setTimeout(r,100));}
+        for(let page=0;page<250;page++){
+          check();
+          for(const option of readOptions())if(!seen.has(option.id)){seen.add(option.id);await visit(option);}
+          if(!scroller||scroller.scrollTop+scroller.clientHeight>=scroller.scrollHeight-2)return seen;
+          const before=scroller.scrollTop;scroller.scrollTop+=Math.max(1,Math.floor(scroller.clientHeight*.65));scroller.dispatchEvent(new Event('scroll'));
+          await new Promise(r=>setTimeout(r,100));
+          if(scroller.scrollTop===before)throw Error('Nelze projít celý seznam terapeutů.');
+        }
+        throw Error('Seznam terapeutů je příliš dlouhý.');
+      }
+      const available=await scan(async option=>{
+        if(option.disabled&&option.selected!==wanted.has(option.id))throw Error('Některého terapeuta nelze přepnout.');
+      });
+      if([...wanted].some(id=>!available.has(id)))throw Error('Požadovaný terapeut chybí v aktuálním filtru. Zkontrolujte pracoviště.');
+      let changed=0;
+      await scan(async option=>{
+        if(option.selected===wanted.has(option.id))return;
+        check();
+        const currentOption=readOptions().find(o=>o.id===option.id);
+        if(!currentOption)throw Error('Položka terapeuta zmizela. Zkontrolujte částečný výběr ve filtru.');
+        currentOption.element.click();changed++;progress(changed);
+        await waitFor(()=>{
+          const current=readOptions().find(o=>o.id===option.id);
+          return current&&current.selected===wanted.has(option.id);
+        },'Přepnutí terapeuta nebylo potvrzeno. Seznam může být změněn částečně.');
+      });
+      const actual=new Set();await scan(async option=>{if(option.selected)actual.add(option.id);});
+      if(actual.size!==wanted.size||[...wanted].some(id=>!actual.has(id)))throw Error('Výběr neodpovídá zadání. Zkontrolujte filtr terapeutů.');
+      return actual.size;
+    }finally{await closeTherapistMenu(combo);}
+  }
   async function ensureTherapistVisible(date, resourceId, title) {
     const visible = element => element.getClientRects().length > 0;
     const hasColumn = () => [...document.querySelectorAll('td.fc-timegrid-col[data-date][data-resource-id]')]
@@ -457,14 +622,32 @@
       .plus-switches label:has(input){display:flex;align-items:center;gap:8px}.plus-switches input[type="checkbox"]{width:auto;margin:0}
       input[type="color"]{height:36px;padding:3px;width:80px}#settings button{margin:5px 4px 5px 0;padding:7px;border:1px solid #ccc;border-radius:6px;background:white}
       #settings a{color:#b52854}#settings summary:focus-visible{outline:2px solid #ed4374}
+      #tile-row{display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100vw - 16px)}
+      #therapists-toggle{background:#263d49;color:white;border:0;border-radius:9px;padding:12px 16px;box-shadow:0 2px 12px #0003}
+      #therapists-panel{background:white;border:1px solid #ddd;border-radius:12px;padding:16px;width:min(420px,calc(100vw - 16px));max-height:60vh;overflow:auto;box-shadow:0 8px 32px #0003}
+      #therapists-panel button{display:block;width:100%;text-align:left;margin-top:8px;background:#f4f6f5;border:1px solid #dbe0de;padding:10px;border-radius:7px}
+      #therapists-panel button:hover{background:#fff0f5}#therapists-now{color:#b52854;font-weight:bold}
       #settings{border:1px solid #ddd;border-radius:8px;padding:10px;margin:12px 0}
       #settings-list{max-height:180px;overflow:auto}#settings-list label{display:flex;align-items:center;gap:8px;margin:8px 0}
       #settings-list input{width:auto;margin:0}#settings-toggle,#settings-reset{background:white;border:1px solid #ccc;border-radius:5px;padding:6px 9px;margin:6px 0}
-    </style><div id="widget"><button id="toggle" title="Kliknutím otevřete nebo zavřete; tažením přesunete celý panel">Volné termíny</button>
-    <section id="panel" hidden><div id="heading" title="Přetažením přesunete okno"><h2>Fyzion+ <small style="font-size:11px;color:#777">1.1.0</small></h2><button id="close" aria-label="Zavřít">×</button></div>
+      #series-fields{margin:12px 0;padding:12px;background:#fff5f8;border:1px solid #f0d0db;border-radius:8px}
+      #series-fields label:has(input[type="checkbox"]){display:flex;align-items:center;gap:8px}#series-fields input[type="checkbox"]{width:auto;margin:0}
+      .series-plan{margin:12px 0;padding:12px;border:1px solid #ead8df;border-radius:9px;background:#fffafb}.series-plan ol{list-style:none;padding:0;margin:5px 0}
+      #results>li.day-group{padding:0;border:1px solid #e4e6e5;border-radius:9px;margin:7px 0;overflow:hidden}
+      #results details.day-result{padding:0;border:0}#results .day-result>summary{padding:10px 12px;cursor:pointer;list-style:none;background:#f8f9f8}
+      #results .day-result>summary::-webkit-details-marker{display:none}.day-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px}
+      .day-count{font-size:11px;font-weight:normal;color:#666}.day-preview{display:block;margin-top:3px;font-size:12px;color:#666;font-weight:normal}
+      .day-chevron{font-size:12px;color:#b52854;display:inline-block;margin-right:5px}.day-result[open] .day-chevron{transform:rotate(90deg)}
+      .day-options{list-style:none;margin:0;padding:0 6px}.day-options .slot-link{font-size:13px;padding:9px 6px}
+    </style><div id="widget"><div id="tile-row"><button id="toggle" title="Kliknutím otevřete nebo zavřete; tažením přesunete celý panel">Volné termíny</button><button id="therapists-toggle" type="button" aria-expanded="false" aria-controls="therapists-panel">Zobrazit terapeuty</button></div>
+    <section id="therapists-panel" hidden aria-label="Zobrazení terapeutů"><strong>Zobrazit terapeuty</strong>
+      <button id="therapists-now" type="button">Právě pracují</button><button id="therapists-all" type="button">Zobrazit všechny terapeuty</button><button id="therapists-none" type="button">Skrýt všechny terapeuty</button>
+      <p class="muted">Pracuje pouze s terapeuty povolenými v Nastavení Fyzion+. Právě pracují: skutečný dnešní čas v Praze, běžný rozvrh bez právě probíhajícího volna. Objednané návštěvy se neodečítají. Volba nahradí aktuální výběr sloupců.</p><p id="therapists-message" class="muted" role="status"></p></section>
+    <section id="panel" hidden><div id="heading" title="Přetažením přesunete okno"><h2>Volné termíny <small style="font-size:11px;color:#777">Fyzion+ 1.6.1</small></h2><button id="close" aria-label="Zavřít">×</button></div>
       <p class="muted">Běžný týdenní rozvrh bez nepravidelné pracovní doby. Praha. Začátky po 15 minutách. Nic se automaticky nerezervuje.</p>
       <button id="settings-toggle" type="button" aria-expanded="false">Nastavení Fyzion+</button>
       <div id="settings" hidden>
+      <details open><summary>Moduly</summary><div class="plus-switches"><label><input id="plus-therapistsModule" type="checkbox">Zobrazit terapeuty</label><label><input id="plus-seriesModule" type="checkbox">Naplánovat sérii termínů</label></div><p class="muted">Série přidá do Volných termínů počet návštěv a volbu jednoho terapeuta. Vypnutí zobrazení terapeutů nezmění aktuální výběr sloupců.</p></details>
       <details open><summary>Vzhled Fyzionu</summary><div class="plus-switches">
         <label><input id="plus-contrast" type="checkbox">Výraznější volno</label>
         <label for="plus-offColor">Barva volna</label><input id="plus-offColor" type="color">
@@ -476,7 +659,8 @@
       </div></details>
       <details><summary>Výchozí hledání</summary>
         <label for="plus-duration">Délka návštěvy</label><select id="plus-duration"><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">1 h</option></select>
-        <label for="plus-days">Počet dní</label><input id="plus-days" type="number" min="1" max="90" value="40">
+        <label for="days">Rozsah prohledávání (kalendářní dny)</label><input id="days" type="number" min="1" max="90" step="1" value="40">
+        <p class="muted">Celé prohledávané období od data Hledat od. Určuje i to, jak daleko mohou pokračovat série. Maximum 90 dní.</p>
       </details>
       <details><summary>Přenos na jiný počítač</summary><p class="muted">Na novém počítači nainstalujte Fyzion+ a poté importujte nastavení. Import nahrazuje zdejší nastavení.</p>
         <button id="plus-export" type="button">Export nastavení</button><button id="plus-import" type="button">Import nastavení</button>
@@ -491,12 +675,87 @@
         <div id="therapist-list"></div><p id="selection-count" class="muted"></p></div>
       <label for="duration">Délka návštěvy</label><select id="duration"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 h</option></select>
       <label for="from">Hledat od</label><input id="from" type="date">
-      <label for="days">Počet kalendářních dní (včetně prvního dne)</label><input id="days" type="number" min="1" max="90" step="1" value="40">
+      <div class="plus-switches"><label><input id="first-within40" type="checkbox">První návštěva do 40 dní</label></div>
+      <p class="muted">První návštěva nejpozději 40 kalendářních dní ode dneška. Další termíny série mohou být později, v nastaveném rozsahu hledání.</p><p id="search-range-note" class="muted"></p>
+      <div id="series-fields" hidden><label for="series-count">Počet termínů</label><input id="series-count" type="number" min="1" max="30" step="1" value="5">
+        <label for="series-spacing">Rozestup termínů</label><select id="series-spacing"><option value="asap">Nejbližší volné termíny</option><option value="weekly">1× týdně</option><option value="twice">2× týdně</option><option value="daily">Každý den</option></select>
+        <label><input id="series-single" type="checkbox" checked>Pouze u jednoho terapeuta</label>
+        <p id="series-spacing-note" class="muted"></p><p class="muted">Bez automatické rezervace. Pro kombinování terapeutů vyberte v poli Terapeut možnost Všichni. Hodina návštěv se může lišit.</p></div>
       <button id="search">Načíst období a najít termíny</button><button id="cancel" hidden>Zrušit hledání</button>
       <p id="message" aria-live="polite"></p><p id="snapshot" aria-live="polite"></p><p id="navigation" aria-live="polite"></p><ul id="results"></ul>
       <p class="muted">Výsledky platí pro načtená data. Před rezervací obnovte kalendář a proveďte hledání znovu. Konečnou dostupnost ověřuje Fyzion při uložení.</p>
     </section></div>`;
-    const el = id => root.getElementById(id);
+    const dockHost=document.createElement('div');
+    document.documentElement.append(dockHost);
+    const dockRoot=dockHost.attachShadow({mode:'open'});
+    const dockStyle=document.createElement('style');
+    dockStyle.textContent=root.querySelector('style').textContent+`
+      #therapists-dock{position:fixed;z-index:2147483645;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+      #therapists-toggle{width:100%;min-height:38px;padding:9px 14px}
+      #therapists-panel{max-height:min(55vh,calc(100vh - 100px));margin:0}
+    `;
+    const dock=document.createElement('div');dock.id='therapists-dock';dock.hidden=true;
+    dock.append(root.getElementById('therapists-toggle'));dock.append(root.getElementById('therapists-panel'));
+    dockRoot.append(dockStyle);dockRoot.append(dock);
+    const settingsHost=document.createElement('div');
+    document.documentElement.append(settingsHost);
+    const settingsRoot=settingsHost.attachShadow({mode:'open'}),settingsStyle=document.createElement('style');
+    settingsStyle.textContent=root.querySelector('style').textContent+`
+      #settings-dock{position:fixed;z-index:2147483647;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+      #settings-toggle{margin:0;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:#ed4374;color:white;font-size:27px;line-height:1;box-shadow:0 2px 8px #0002}
+      #settings{margin:0;padding:16px;width:min(420px,calc(100vw - 16px));max-height:calc(100vh - 65px);overflow:auto;background:white;border-radius:12px;box-shadow:0 8px 32px #0003}
+      #settings-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+      #settings-header h2{margin:0;font-size:18px}#settings-header button{border:0;background:none;font-size:22px;padding:0 5px}
+    `;
+    const settingsDock=document.createElement('div');settingsDock.id='settings-dock';
+    const settingsToggle=root.getElementById('settings-toggle');
+    settingsToggle.textContent='+';settingsToggle.title='Nastavení Fyzion+';
+    settingsToggle.setAttribute('aria-label','Otevřít nastavení Fyzion+');settingsToggle.setAttribute('aria-controls','settings');
+    const settingsBody=root.getElementById('settings');
+    const settingsHeader=document.createElement('div');settingsHeader.id='settings-header';
+    const settingsTitle=document.createElement('h2');settingsTitle.textContent='Nastavení Fyzion+';
+    const settingsClose=document.createElement('button');settingsClose.id='settings-close';settingsClose.type='button';settingsClose.textContent='×';settingsClose.setAttribute('aria-label','Zavřít nastavení Fyzion+');
+    settingsHeader.append(settingsTitle);settingsHeader.append(settingsClose);settingsBody.prepend(settingsHeader);
+    settingsDock.append(settingsToggle);settingsDock.append(settingsBody);settingsRoot.append(settingsStyle);settingsRoot.append(settingsDock);
+    const el = id => root.getElementById(id)||dockRoot.getElementById(id)||settingsRoot.getElementById(id);
+    function positionSettingsDock(){
+      const logos=[...document.querySelectorAll('img')].filter(image=>{
+        const box=image.getBoundingClientRect();
+        return image.getClientRects().length&&box.left<300&&box.top>=0&&box.top<180&&box.width>=70&&box.height>=15&&/fyzion|logo/i.test(`${image.alt} ${image.getAttribute('src')||''}`);
+      }).sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top);
+      const logo=logos[0]?.getBoundingClientRect();
+      const left=Math.max(8,Math.min(logo?.left??8,innerWidth-40));
+      const top=Math.max(4,Math.min(logo?logo.top-38:8,innerHeight-40));
+      settingsDock.style.left=left+'px';settingsDock.style.top=top+'px';
+      settingsBody.style.width=Math.max(150,Math.min(420,innerWidth-left-8))+'px';
+      settingsBody.style.maxHeight=Math.max(100,innerHeight-top-50)+'px';
+    }
+    window.addEventListener('resize',positionSettingsDock);window.addEventListener('scroll',positionSettingsDock,true);
+    positionSettingsDock();
+    let therapistModuleEnabled=true;
+    function positionTherapistDock(){
+      if(!therapistModuleEnabled){
+        dock.hidden=true;dockRoot.getElementById('therapists-panel').hidden=true;
+        dockRoot.getElementById('therapists-toggle').setAttribute('aria-expanded','false');return;
+      }
+      const fields=[...document.querySelectorAll('label.q-select--multiple')].filter(e=>e.getClientRects().length&&
+        /^(terapeuti|therapists)\b/.test(normalize(e.querySelector('.q-field__native .ellipsis')?.textContent)));
+      if(fields.length!==1){dock.hidden=true;return;}
+      const box=fields[0].getBoundingClientRect();
+      if(box.bottom<0||box.bottom>innerHeight-40||box.right<=0||box.left>=innerWidth){dock.hidden=true;return;}
+      dock.hidden=false;
+      const width=Math.min(Math.max(180,box.width),innerWidth-16);
+      const left=Math.max(8,Math.min(box.left,innerWidth-width-8));
+      dock.style.left=left+'px';dock.style.top=(box.bottom+6)+'px';dock.style.width=width+'px';
+      const menu=dockRoot.getElementById('therapists-panel');
+      menu.style.width=Math.min(420,innerWidth-left-8)+'px';
+      menu.style.maxHeight=Math.max(80,innerHeight-box.bottom-62)+'px';
+    }
+    window.addEventListener('resize',positionTherapistDock);
+    window.addEventListener('scroll',positionTherapistDock,true);
+    const dockObserver=new ResizeObserver(positionTherapistDock);
+    dockObserver.observe(document.documentElement);
+    positionTherapistDock();
     el('from').value = parts(Date.now()).date;
     const clear = () => { el('results').replaceChildren(); el('message').textContent = ''; el('snapshot').textContent = ''; el('navigation').textContent = ''; };
     let navigating = false;
@@ -535,25 +794,31 @@
       if(css!==lastAppearance){appearance.textContent=css;lastAppearance=css;}
     }
     function syncPreferenceControls(){
-      for(const key of ['contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) el('plus-'+key).checked=preferences[key];
-      for(const key of ['offColor','hatchColor','duration','days']) el('plus-'+key).value=String(preferences[key]);
+      for(const key of ['seriesModule','therapistsModule','contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) el('plus-'+key).checked=preferences[key];
+      for(const key of ['offColor','hatchColor','duration','days']) el(key==='days'?'days':'plus-'+key).value=String(preferences[key]);
+      el('first-within40').checked=preferences.firstWithin40;
+      el('series-count').value=String(preferences.seriesCount);el('series-single').checked=preferences.seriesSingle;
+      el('series-spacing').value=preferences.seriesSpacing;
+      therapistModuleEnabled=preferences.therapistsModule;positionTherapistDock();
     }
     function persistPreferences(){
       try{localStorage.setItem(PLUS_KEY,JSON.stringify(preferences));plusMessage='Nastavení Fyzion+ uloženo.';}
       catch(_){plusMessage='Nastavení nelze uložit. Změny platí pouze do obnovení stránky.';}
       el('plus-message').textContent=plusMessage;
+      therapistModuleEnabled=preferences.therapistsModule;positionTherapistDock();
       applyAppearance();
     }
     syncPreferenceControls();
     el('duration').value=String(preferences.duration);el('days').value=String(preferences.days);
     applyAppearance();
-    for(const key of ['contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days']){
-      el('plus-'+key).onchange=()=>{
+    for(const key of ['seriesModule','therapistsModule','contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days']){
+      el(key==='days'?'days':'plus-'+key).onchange=()=>{
         try{
-          let value=el('plus-'+key).value;
+          let value=el(key==='days'?'days':'plus-'+key).value;
           if(typeof PLUS_DEFAULTS[key]==='boolean')value=el('plus-'+key).checked;
           if(key==='duration'||key==='days')value=Number(value);
           preferences=validatePreferences({...preferences,[key]:value});
+          if(key==='seriesModule'){clear();resultLoaded=null;render();}
           if(key==='duration'||key==='days'){el(key).value=String(value);clear();resultLoaded=null;}
           persistPreferences();
         }catch(e){el('plus-message').textContent=e.message;syncPreferenceControls();}
@@ -606,9 +871,19 @@
     };
 
     render = () => {
+      positionSettingsDock();
+      positionTherapistDock();
       applyAppearance();
+      for(const id of ['therapists-now','therapists-all','therapists-none'])el(id).disabled=searching||navigating;
       el('plus-import').disabled=searching||navigating;
-      for(const k of ['contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days'])el('plus-'+k).disabled=searching||navigating;
+      for(const k of ['seriesModule','therapistsModule','contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days'])el(k==='days'?'days':'plus-'+k).disabled=searching||navigating;
+      el('first-within40').disabled=searching||navigating;
+      el('search-range-note').textContent=`Rozsah hledání: ${preferences.days} kalendářních dní. Změníte přes + → Výchozí hledání.`;
+      el('series-fields').hidden=!preferences.seriesModule;
+      el('series-count').disabled=searching||navigating;el('series-single').disabled=searching||navigating;
+      el('series-spacing').disabled=searching||navigating;
+      el('series-spacing-note').textContent={asap:'Nejbližší volné termíny, nejvýše jeden denně.',weekly:'Každých 7 kalendářních dní.',twice:'Střídavě po 3 a 4 kalendářních dnech.',daily:'Každý následující kalendářní den, včetně víkendů. Série se nabídne pouze tehdy, jsou-li všechny dny dostupné.'}[preferences.seriesSpacing];
+      el('search').textContent=preferences.seriesModule?'Najít sérii termínů':'Načíst období a najít termíny';
       if (searching && resultChanges !== state.changes) controller?.abort();
       const selected = el('therapist').value;
       const allResources = state.resources || [];
@@ -707,6 +982,23 @@
     window.addEventListener('resize', () => keepInside(el('widget')));
     for (const id of ['therapist', 'duration', 'from', 'days']) el(id).oninput = () => { clear(); resultLoaded = null; render(); };
     el('therapist').onchange = el('therapist').oninput;
+    el('first-within40').onchange=()=>{
+      preferences=validatePreferences({...preferences,firstWithin40:el('first-within40').checked});
+      clear();resultLoaded=null;persistPreferences();
+    };
+    el('series-count').oninput=()=>{clear();resultLoaded=null;};
+    el('series-count').onchange=()=>{
+      try{preferences=validatePreferences({...preferences,seriesCount:Number(el('series-count').value)});persistPreferences();}
+      catch(e){el('message').textContent=e.message;}
+    };
+    el('series-single').onchange=()=>{
+      preferences=validatePreferences({...preferences,seriesSingle:el('series-single').checked});
+      clear();resultLoaded=null;persistPreferences();
+    };
+    el('series-spacing').onchange=()=>{
+      preferences=validatePreferences({...preferences,seriesSpacing:el('series-spacing').value});
+      clear();resultLoaded=null;persistPreferences();render();
+    };
     function setAllSelection(include) {
       for (const [id, input] of checkboxes) { input.checked = include; if (include) excluded.delete(id); else excluded.add(id); }
       clear(); resultLoaded = null; render();
@@ -716,13 +1008,58 @@
     el('settings-toggle').onclick = () => {
       el('settings').hidden = !el('settings').hidden;
       el('settings-toggle').setAttribute('aria-expanded', String(!el('settings').hidden));
-      keepInside(el('widget'));
+      el('settings-toggle').setAttribute('aria-label',el('settings').hidden?'Otevřít nastavení Fyzion+':'Zavřít nastavení Fyzion+');
+      positionSettingsDock();
+    };
+    el('settings-close').onclick=()=>{
+      el('settings').hidden=true;el('settings-toggle').setAttribute('aria-expanded','false');el('settings-toggle').setAttribute('aria-label','Otevřít nastavení Fyzion+');
     };
     el('settings-reset').onclick = () => {
       permanentlyHidden.clear();
       for (const input of settingsInputs.values()) input.checked = true;
       saveSettings();
     };
+    el('therapists-toggle').onclick=()=>{
+      el('therapists-panel').hidden=!el('therapists-panel').hidden;
+      el('therapists-toggle').setAttribute('aria-expanded',String(!el('therapists-panel').hidden));
+      positionTherapistDock();
+    };
+    async function changeTherapists(mode){
+      if(searching||navigating)return;
+      if(!state.transport){el('therapists-message').textContent='Nejprve otevřete kalendář a počkejte na přihlášené načtení dat.';return;}
+      navigating=true;render();
+      const snapshot=state.changes,abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),90000);
+      const check=()=>{if(abort.signal.aborted||snapshot!==state.changes)throw Error('Operace byla přerušena. Zkontrolujte aktuální výběr terapeutů.');};
+      const transport={headers:new Headers(state.transport.headers),credentials:state.transport.credentials};
+      el('therapists-message').textContent='Načítám aktuální terapeuty…';
+      try{
+        const resources=arrayOf(await readApi('https://api.fyzion.cz/v1/calendar-users/resources/',transport,abort.signal));
+        check();
+        const allowedResources=resources.filter(r=>!permanentlyHidden.has(r.id));
+        let desired=mode==='all'?allowedResources.map(r=>r.id):[];
+        if(mode==='now'&&allowedResources.length){
+          const now=Date.now(),date=parts(now).date;
+          const url=new URL('https://api.fyzion.cz/v1/calendar-users/events/');
+          url.searchParams.set('start',new Date(localMs(date,'00:00:00')).toISOString());
+          url.searchParams.set('end',new Date(localMs(nextDay(date),'00:00:00')).toISOString());
+          for(const r of allowedResources)url.searchParams.append('user_ids',r.id);
+          el('therapists-message').textContent='Ověřuji dnešní pracovní dobu a volno…';
+          const events=availabilityOnly(arrayOf(await readApi(url,transport,abort.signal)));
+          check();
+          const currentNow=Date.now();
+          if(parts(currentNow).date!==date)throw Error('Během načítání se změnil den. Zopakujte výběr.');
+          desired=workingResources(allowedResources,events,currentNow).map(r=>r.id);
+        }
+        check();
+        const count=await setTherapistSelection(resources,desired,check,n=>{el('therapists-message').textContent=`Upravuji výběr terapeutů: ${n} změn…`;});
+        el('therapists-message').textContent=mode==='now'?`Právě pracují: vybráno ${count} terapeutů podle skutečného dnešního času.`:
+          mode==='all'?`Vybráni všichni povolení terapeuti (${count}).`:'Všichni terapeuti jsou skrytí.';
+      }catch(e){el('therapists-message').textContent=`Výběr se nepodařilo dokončit: ${e.message}`;}
+      finally{clearTimeout(timeout);navigating=false;render();}
+    }
+    el('therapists-now').onclick=()=>changeTherapists('now');
+    el('therapists-all').onclick=()=>changeTherapists('all');
+    el('therapists-none').onclick=()=>changeTherapists('none');
     el('cancel').onclick = () => controller?.abort();
     el('search').onclick = async () => {
       clear(); render();
@@ -736,10 +1073,14 @@
         if (signal.aborted || changes !== state.changes) throw Error('Hledání bylo zrušeno nebo byla upravena data kalendáře. Spusťte ho znovu.');
       };
       const selected = el('therapist').value, date = el('from').value, days = Number(el('days').value), duration = Number(el('duration').value);
+      const seriesEnabled=preferences.seriesModule,seriesCount=Number(el('series-count').value),seriesSingle=el('series-single').checked,seriesSpacing=el('series-spacing').value;
+      const firstBefore=el('first-within40').checked?localMs(addDays(parts(Date.now()).date,41),'00:00:00'):Infinity;
       const transport = { headers: new Headers(state.transport.headers), credentials: state.transport.credentials };
       try {
         rangeChunks(date, days);
         if (![15, 30, 45, 60].includes(duration)) throw Error('Vyberte délku 15, 30, 45 minut nebo 1 hodinu.');
+        if(seriesEnabled&&(!Number.isInteger(seriesCount)||seriesCount<1||seriesCount>30))throw Error('Počet termínů musí být 1–30.');
+        if(seriesEnabled&&!Object.hasOwn(SERIES_SPACING,seriesSpacing))throw Error('Vyberte rozestup termínů.');
         searching = true; progressText = 'Načítám aktuální pracovní rozvrh…'; render();
         const resources = arrayOf(await readApi('https://api.fyzion.cz/v1/calendar-users/resources/', transport, signal));
         check();
@@ -759,15 +1100,16 @@
         });
         check();
         if (Date.now() - batch.loaded >= MAX_AGE) throw Error('Načítání trvalo příliš dlouho. Zkuste hledání znovu.');
-        const result = findAllSlots({ resources: matches, events: batch.events, from: batch.from, to: batch.to, duration, limit: 10000 });
+        const result = findAllSlots({ resources: matches, events: batch.events, from: batch.from, to: batch.to, duration, limit: seriesEnabled?Math.max(10000,10000*matches.length):10000 });
+        if(!seriesEnabled)result.slots=result.slots.filter(slot=>slot.start<firstBefore);
         resultLoaded = batch.loaded;
         const dateFmt = new Intl.DateTimeFormat('cs-CZ', { timeZone: ZONE, weekday: 'short', day: 'numeric', month: 'numeric' });
         const timeFmt = new Intl.DateTimeFormat('cs-CZ', { timeZone: ZONE, hour: '2-digit', minute: '2-digit' });
-        for (const slot of result.slots) {
+        function slotItem(slot,index=null) {
           const li = document.createElement('li');
           const button = document.createElement('button');
           button.type = 'button'; button.className = 'slot-link';
-          button.textContent = `${dateFmt.format(slot.start)} · ${timeFmt.format(slot.start)}–${timeFmt.format(slot.end)} · ${slot.title}`;
+          button.textContent = `${index===null?'':(index+1)+'. '}${dateFmt.format(slot.start)} · ${timeFmt.format(slot.start)}–${timeFmt.format(slot.end)} · ${slot.title}`;
           button.title = 'Otevřít den a čas v kalendáři';
           button.onclick = async () => {
             if (navigating || searching) return;
@@ -777,12 +1119,48 @@
             finally { navigating = false; render(); }
           };
           li.append(button);
-          el('results').append(li);
+          return li;
+        }
+        let seriesResult=null;
+        if(seriesEnabled){
+          if(result.more)throw Error('Pro sérii nebyla zpracována všechna dostupná okna. Zkraťte rozsah hledání.');
+          seriesResult=planSeries(result.slots,seriesCount,seriesSingle,seriesSpacing,firstBefore);
+          for(const plan of seriesResult.plans){
+            const wrapper=document.createElement('li');wrapper.className='series-plan';
+            const title=document.createElement('strong');title.textContent=seriesSingle?`${plan[0].title} · ${seriesCount} termínů`:`Série · ${seriesCount} termínů`;
+            const list=document.createElement('ol');plan.forEach((slot,index)=>list.append(slotItem(slot,index)));
+            wrapper.append(title);wrapper.append(list);el('results').append(wrapper);
+          }
+        }else{
+          const dayFmt=new Intl.DateTimeFormat('cs-CZ',{timeZone:ZONE,weekday:'long',day:'numeric',month:'numeric',year:'numeric'});
+          for(const group of groupSlotsByDay(result.slots)){
+            const wrapper=document.createElement('li');wrapper.className='day-group';
+            const details=document.createElement('details');details.className='day-result';
+            const summary=document.createElement('summary'),heading=document.createElement('span');heading.className='day-title';
+            const label=document.createElement('span'),chevron=document.createElement('span');chevron.className='day-chevron';chevron.textContent='▶';chevron.setAttribute('aria-hidden','true');
+            const day=document.createElement('strong');day.textContent=dayFmt.format(group.slots[0].start);label.append(chevron);label.append(day);
+            const count=document.createElement('span');count.className='day-count';count.textContent=`Možnosti: ${group.slots.length}`;
+            heading.append(label);heading.append(count);
+            const preview=document.createElement('span');preview.className='day-preview';
+            preview.textContent=group.preview.map(t=>timeFmt.format(t)).join(' · ')+(group.moreTimes?` · +${group.moreTimes} dalších časů`:'')+(group.therapistCount>1?` · Terapeuti: ${group.therapistCount}`:'');
+            summary.append(heading);summary.append(preview);details.append(summary);
+            let populated=false;
+            details.ontoggle=()=>{
+              if(!details.open||populated)return;
+              const list=document.createElement('ul');list.className='day-options';
+              for(const slot of group.slots)list.append(slotItem(slot));
+              details.append(list);populated=true;
+            };
+            wrapper.append(details);el('results').append(wrapper);
+          }
         }
         const dateFmtFull = new Intl.DateTimeFormat('cs-CZ', { timeZone: ZONE, dateStyle: 'short' });
         const rangeText = `${dateFmtFull.format(batch.from)}–${dateFmtFull.format(localMs(addDays(date, days - 1), '12:00:00'))}`;
-        el('message').textContent = `${rangeText} · ${days} dní ověřeno. ` + (result.slots.length ?
-          `${result.slots.length} možností${result.more ? ' (zobrazeno prvních 10 000)' : ''}. Před použitím porovnejte s kalendářem.` : 'Nebyl nalezen volný termín.');
+        el('message').textContent = `${rangeText} · ${days} dní ověřeno. ${firstBefore===Infinity?'':'První návštěva do 40 dní ode dneška. '}` + (seriesEnabled?
+          (seriesResult.plans.length?`Nalezeno ${seriesResult.plans.length} návrhů kompletní série po ${seriesCount} termínech. ${SERIES_SPACING[seriesSpacing]}. Kliknutí pouze otevře kalendář.`:
+            `Kompletní série nenalezena. Se zvoleným rozestupem lze sestavit nejvýše ${seriesResult.availableCount} z ${seriesCount} termínů${seriesSingle?' u jednoho terapeuta':''}. Zvětšete rozsah, změňte rozestup nebo snižte počet.`):
+          (result.slots.length ?
+          `${result.slots.length} možností${result.more ? ' (zobrazeno prvních 10 000)' : ''}. Kliknutím na den rozbalíte časy. Před použitím porovnejte s kalendářem.` : 'Nebyl nalezen volný termín.'));
       } catch (e) {
         clear(); resultLoaded = null;
         el('message').textContent = `Hledání zastaveno: ${signal.aborted ? 'Zrušeno, vypršel čas načítání nebo se změnil kalendář. Spusťte hledání znovu.' : e.message}`;
