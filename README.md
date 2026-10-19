@@ -7,7 +7,7 @@ Jeden skript pro Tampermonkey sdružuje úpravy vzhledu i hledání volných ter
 1. Ponechte si zálohu původního skriptu a export Stylusu.
 2. V Tampermonkey otevřete existující pomocník Fyzionu, nahraďte celý obsah souborem `fyzion-helper.user.js` z tohoto balíčku a uložte. Nespouštějte dvě kopie pomocníka současně.
 3. Ve Stylusu vypněte původní styly pro Fyzion (včetně společného stylu instalovaného z GitHubu). Nemažte je, dokud novou verzi neověříte. Jinak mohou zůstat jejich pravidla aktivní i při vypnutém přepínači ve Fyzion+.
-4. Obnovte Fyzion. Přesouvatelné tlačítko se nyní jmenuje **Fyzion+**.
+4. Obnovte Fyzion. Přesouvatelné tlačítko se nyní jmenuje **Volné Termíny**.
 5. Otevřete **Nastavení Fyzion+**. V části Vzhled můžete zapínat jednotlivé úpravy a měnit barvy. Další části obsahují výchozí hledání, přenos nastavení a seznam terapeutů.
 
 Vzhled zůstává omezený na stejné části Fyzionu jako v dodaném exportu Stylusu. Časové popisky podporují celodenní osu s 96 řádky po 15 minutách. Nepravidelná pracovní doba není podporovaná.
