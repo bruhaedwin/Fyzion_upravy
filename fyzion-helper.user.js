@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name         Fyzion – pomocník pro volné termíny
+// @name         Fyzion +
 // @namespace    local.fyzion.helpers
-// @version      1.0.0
+// @version      1.1.0
 // @updateURL    https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js
 // @downloadURL  https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js
 // @homepageURL  https://github.com/bruhaedwin/Fyzion_upravy
-// @description  Načte až 90 dní dostupnosti; výchozí rozsah 40 dní. Umožňuje vynechat terapeuty. Nic nerezervuje.
+// @description  Fyzion+ – společné menu vzhledu a volných termínů, nastavení a přenos mezi počítači.
 // @match        https://app.fyzion.cz/*
 // @run-at       document-start
 // @grant        none
@@ -196,8 +196,43 @@
     slots.sort((a, b) => a.start - b.start || a.title.localeCompare(b.title, 'cs') || a.resourceId.localeCompare(b.resourceId));
     return { slots: slots.slice(0, limit), more: more || slots.length > limit };
   }
+  const PLUS_TIME_CSS = "/* Fyzion: casy pod udalostmi a nepruhlednym volnem.\n   Zkusebni varianta pro osu 00:00-24:00 po 15 minutach.\n   Pridat do existujiciho stylu omezeneho na web Fyzionu. */\n.fc:has(.fc-timegrid-slots tr:first-child [data-time=\"00:00:00\"]):has(.fc-timegrid-slots tr:last-child [data-time=\"23:45:00\"]):has(.fc-timegrid-slots tr:nth-child(96):last-child) .fc-timegrid-col:not(.fc-timegrid-axis) .fc-timegrid-col-frame::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  z-index: 0;\n  pointer-events: none;\n  background-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%222765%22%20viewBox%3D%220%200%20240%202765%22%20preserveAspectRatio%3D%22none%22%3E%3Cg%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2210%22%20fill%3D%22%23777777%22%3E%3Ctext%20x%3D%226%22%20y%3D%2212%22%3E00%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2240.802%22%3E00%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2269.604%22%3E00%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2298.406%22%3E00%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22127.208%22%3E01%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22156.01%22%3E01%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22184.812%22%3E01%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22213.615%22%3E01%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22242.417%22%3E02%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22271.219%22%3E02%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22300.021%22%3E02%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22328.823%22%3E02%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22357.625%22%3E03%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22386.427%22%3E03%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22415.229%22%3E03%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22444.031%22%3E03%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22472.833%22%3E04%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22501.635%22%3E04%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22530.437%22%3E04%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22559.24%22%3E04%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22588.042%22%3E05%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22616.844%22%3E05%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22645.646%22%3E05%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22674.448%22%3E05%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22703.25%22%3E06%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22732.052%22%3E06%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22760.854%22%3E06%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22789.656%22%3E06%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22818.458%22%3E07%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22847.26%22%3E07%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22876.062%22%3E07%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22904.865%22%3E07%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22933.667%22%3E08%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22962.469%22%3E08%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22991.271%22%3E08%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221020.073%22%3E08%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221048.875%22%3E09%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221077.677%22%3E09%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221106.479%22%3E09%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221135.281%22%3E09%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221164.083%22%3E10%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221192.885%22%3E10%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221221.687%22%3E10%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221250.49%22%3E10%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221279.292%22%3E11%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221308.094%22%3E11%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221336.896%22%3E11%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221365.698%22%3E11%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221394.5%22%3E12%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221423.302%22%3E12%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221452.104%22%3E12%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221480.906%22%3E12%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221509.708%22%3E13%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221538.51%22%3E13%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221567.312%22%3E13%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221596.115%22%3E13%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221624.917%22%3E14%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221653.719%22%3E14%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221682.521%22%3E14%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221711.323%22%3E14%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221740.125%22%3E15%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221768.927%22%3E15%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221797.729%22%3E15%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221826.531%22%3E15%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221855.333%22%3E16%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221884.135%22%3E16%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221912.937%22%3E16%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221941.74%22%3E16%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221970.542%22%3E17%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221999.344%22%3E17%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222028.146%22%3E17%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222056.948%22%3E17%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222085.75%22%3E18%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222114.552%22%3E18%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222143.354%22%3E18%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222172.156%22%3E18%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222200.958%22%3E19%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222229.76%22%3E19%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222258.562%22%3E19%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222287.365%22%3E19%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222316.167%22%3E20%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222344.969%22%3E20%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222373.771%22%3E20%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222402.573%22%3E20%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222431.375%22%3E21%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222460.177%22%3E21%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222488.979%22%3E21%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222517.781%22%3E21%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222546.583%22%3E22%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222575.385%22%3E22%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222604.187%22%3E22%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222632.99%22%3E22%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222661.792%22%3E23%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222690.594%22%3E23%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222719.396%22%3E23%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222748.198%22%3E23%3A45%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E\");\n  background-repeat: no-repeat;\n background-size: 240px 100%;\nbackground-position: left top;\n}";
+  const PLUS_VERSION = '1.1.0';
+  const PLUS_KEY = 'fyzion-plus-preferences-v1';
+  const PLUS_DEFAULTS = Object.freeze({contrast:true,hidePopup:true,timeLabels:true,hideVisitStatus:true,hatch:true,
+    offColor:'#bfc3ca',hatchColor:'#b9ddf5',duration:30,days:40,position:null});
+  function validatePreferences(input) {
+    if (!input || typeof input !== 'object' || Array.isArray(input)) throw Error('Neplatné nastavení.');
+    if (Object.keys(input).some(k => !Object.hasOwn(PLUS_DEFAULTS,k))) throw Error('Soubor obsahuje neznámé nastavení.');
+    const out = {...PLUS_DEFAULTS,...input};
+    for (const k of ['contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) if (typeof out[k] !== 'boolean') throw Error('Neplatný přepínač vzhledu.');
+    for (const k of ['offColor','hatchColor']) if (!/^#[0-9a-f]{6}$/i.test(out[k])) throw Error('Neplatná barva.');
+    if (![15,30,45,60].includes(out.duration) || !Number.isInteger(out.days) || out.days<1 || out.days>90) throw Error('Neplatná délka nebo rozsah hledání.');
+    if (out.position !== null && (typeof out.position !== 'object' || Array.isArray(out.position) ||
+      Object.keys(out.position).sort().join(',') !== 'x,y' || ![out.position.x,out.position.y].every(v=>Number.isFinite(v)&&v>=0&&v<=100000))) throw Error('Neplatná poloha panelu.');
+    return out;
+  }
+  function validateBundle(body) {
+    if (!body || body.app !== 'Fyzion+' || body.schema !== 1) throw Error('Vyberte export nastavení Fyzion+.');
+    if (!Array.isArray(body.hiddenTherapistIds) || body.hiddenTherapistIds.length>1000 ||
+      body.hiddenTherapistIds.some(id=>typeof id!=='string'||!id||id.length>200)) throw Error('Neplatný seznam terapeutů.');
+    return {settings:validatePreferences(body.settings), hiddenTherapistIds:[...new Set(body.hiddenTherapistIds)]};
+  }
+  function makeAppearance(settings, href) {
+    const path=new URL(href).pathname;
+    let css='';
+    if(path.startsWith('/calendar/physiotherapists')) {
+      if(settings.contrast) css+=`.fc{--fc-non-business-color:${settings.offColor}}.fc .fc-non-business{background:${settings.offColor}!important;opacity:1!important}\n`;
+      if(settings.hidePopup) css+='.bubble:has(.bubble__actions):has(.bubble__name){display:none!important}\n';
+      if(settings.timeLabels) css+=PLUS_TIME_CSS+'\n';
+      if(settings.hatch) css+=`.fc-timegrid-event:has(.hatched-overlay){background-color:${settings.hatchColor}!important;border-color:#6ba9d1!important}.fc-timegrid-event:has(.hatched-overlay) .fc-event-main{color:#172b3a!important}\n`;
+    }
+    if(path.startsWith('/patients')&&settings.hideVisitStatus) css+='.visit-status-selector-wrap{display:none!important}\n';
+    return css;
+  }
+
   if (typeof window === 'undefined') {
-    if (typeof module !== 'undefined') module.exports = { findSlots, findAllSlots, localMs, arrayOf, parts, rangeChunks, loadRange, pickerPeriod, choosePickerDate };
+    if (typeof module !== 'undefined') module.exports = { validatePreferences, validateBundle, makeAppearance, PLUS_DEFAULTS, findSlots, findAllSlots, localMs, arrayOf, parts, rangeChunks, loadRange, pickerPeriod, choosePickerDate };
     return;
   }
   if (window.__fyzionFreeSlotsInstalled) return;
@@ -418,14 +453,37 @@
       #therapist-list label{display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer}
       #therapist-list input{width:auto;margin:0;padding:0}#selection-actions{display:flex;gap:8px;margin:8px 0}
       #selection-actions button{background:white;border:1px solid #ccc;border-radius:5px;padding:5px 8px}
+      details{border-bottom:1px solid #eee;padding:10px 0}summary{cursor:pointer;font-weight:bold}
+      .plus-switches label:has(input){display:flex;align-items:center;gap:8px}.plus-switches input[type="checkbox"]{width:auto;margin:0}
+      input[type="color"]{height:36px;padding:3px;width:80px}#settings button{margin:5px 4px 5px 0;padding:7px;border:1px solid #ccc;border-radius:6px;background:white}
+      #settings a{color:#b52854}#settings summary:focus-visible{outline:2px solid #ed4374}
       #settings{border:1px solid #ddd;border-radius:8px;padding:10px;margin:12px 0}
       #settings-list{max-height:180px;overflow:auto}#settings-list label{display:flex;align-items:center;gap:8px;margin:8px 0}
       #settings-list input{width:auto;margin:0}#settings-toggle,#settings-reset{background:white;border:1px solid #ccc;border-radius:5px;padding:6px 9px;margin:6px 0}
     </style><div id="widget"><button id="toggle" title="Kliknutím otevřete nebo zavřete; tažením přesunete celý panel">Volné termíny</button>
-    <section id="panel" hidden><div id="heading" title="Přetažením přesunete okno"><h2>Volné termíny</h2><button id="close" aria-label="Zavřít">×</button></div>
+    <section id="panel" hidden><div id="heading" title="Přetažením přesunete okno"><h2>Fyzion+ <small style="font-size:11px;color:#777">1.1.0</small></h2><button id="close" aria-label="Zavřít">×</button></div>
       <p class="muted">Běžný týdenní rozvrh bez nepravidelné pracovní doby. Praha. Začátky po 15 minutách. Nic se automaticky nerezervuje.</p>
-      <button id="settings-toggle" type="button" aria-expanded="false">Nastavení terapeutů</button>
-      <div id="settings" hidden><strong>Terapeuti dostupní pro hledání</strong><p class="muted">Odškrtnuté terapeuty skryji z nabídky i z volby Všichni. Nastavení se ukládá v tomto prohlížeči.</p>
+      <button id="settings-toggle" type="button" aria-expanded="false">Nastavení Fyzion+</button>
+      <div id="settings" hidden>
+      <details open><summary>Vzhled Fyzionu</summary><div class="plus-switches">
+        <label><input id="plus-contrast" type="checkbox">Výraznější volno</label>
+        <label for="plus-offColor">Barva volna</label><input id="plus-offColor" type="color">
+        <label><input id="plus-hidePopup" type="checkbox">Skrýt náhled při najetí myší</label>
+        <label><input id="plus-timeLabels" type="checkbox">Časové popisky v kalendáři</label>
+        <label><input id="plus-hideVisitStatus" type="checkbox">Skrýt nabídku Stav návštěvy</label>
+        <label><input id="plus-hatch" type="checkbox">Odlišit šrafované události</label>
+        <label for="plus-hatchColor">Barva šrafovaných událostí</label><input id="plus-hatchColor" type="color">
+      </div></details>
+      <details><summary>Výchozí hledání</summary>
+        <label for="plus-duration">Délka návštěvy</label><select id="plus-duration"><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">1 h</option></select>
+        <label for="plus-days">Počet dní</label><input id="plus-days" type="number" min="1" max="90" value="40">
+      </details>
+      <details><summary>Přenos na jiný počítač</summary><p class="muted">Na novém počítači nainstalujte Fyzion+ a poté importujte nastavení. Import nahrazuje zdejší nastavení.</p>
+        <button id="plus-export" type="button">Export nastavení</button><button id="plus-import" type="button">Import nastavení</button>
+        <input id="plus-file" type="file" accept=".json,application/json" hidden>
+        <button id="plus-reset-position" type="button">Vrátit polohu panelu</button>
+        <p><a href="https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js" target="_blank" rel="noopener noreferrer">Instalační odkaz Fyzion+</a></p>
+      </details><p id="plus-message" class="muted" aria-live="polite"></p><strong>Terapeuti dostupní pro hledání</strong><p class="muted">Odškrtnuté terapeuty skryji z nabídky i z volby Všichni. Nastavení se ukládá v tomto prohlížeči.</p>
         <div id="settings-list"></div><button id="settings-reset" type="button">Obnovit všechny terapeuty</button><p id="settings-message" class="muted" aria-live="polite"></p></div>
       <p id="status"></p><label for="therapist">Terapeut</label><select id="therapist"></select>
       <div id="therapist-selection" hidden><p class="muted">Zrušte zaškrtnutí terapeutů, které chcete z hledání vynechat.</p>
@@ -464,7 +522,93 @@
     let selectionKey = null;
     let searching = false, controller = null, resultLoaded = null, progressText = '';
     let resultChanges = 0;
+    let plusMessage='';
+    let preferences={...PLUS_DEFAULTS};
+    try {preferences=validatePreferences(JSON.parse(localStorage.getItem(PLUS_KEY)||'{}'));}
+    catch(_){plusMessage='Nastavení Fyzion+ nelze přečíst; používám výchozí hodnoty.';}
+    const appearance=document.createElement('style');
+    appearance.id='fyzion-plus-appearance';
+    document.documentElement.append(appearance);
+    let lastAppearance='';
+    function applyAppearance(){
+      const css=makeAppearance(preferences,location.href);
+      if(css!==lastAppearance){appearance.textContent=css;lastAppearance=css;}
+    }
+    function syncPreferenceControls(){
+      for(const key of ['contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) el('plus-'+key).checked=preferences[key];
+      for(const key of ['offColor','hatchColor','duration','days']) el('plus-'+key).value=String(preferences[key]);
+    }
+    function persistPreferences(){
+      try{localStorage.setItem(PLUS_KEY,JSON.stringify(preferences));plusMessage='Nastavení Fyzion+ uloženo.';}
+      catch(_){plusMessage='Nastavení nelze uložit. Změny platí pouze do obnovení stránky.';}
+      el('plus-message').textContent=plusMessage;
+      applyAppearance();
+    }
+    syncPreferenceControls();
+    el('duration').value=String(preferences.duration);el('days').value=String(preferences.days);
+    applyAppearance();
+    for(const key of ['contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days']){
+      el('plus-'+key).onchange=()=>{
+        try{
+          let value=el('plus-'+key).value;
+          if(typeof PLUS_DEFAULTS[key]==='boolean')value=el('plus-'+key).checked;
+          if(key==='duration'||key==='days')value=Number(value);
+          preferences=validatePreferences({...preferences,[key]:value});
+          if(key==='duration'||key==='days'){el(key).value=String(value);clear();resultLoaded=null;}
+          persistPreferences();
+        }catch(e){el('plus-message').textContent=e.message;syncPreferenceControls();}
+      };
+    }
+    el('plus-export').onclick=()=>{
+      const body={app:'Fyzion+',schema:1,version:PLUS_VERSION,settings:preferences,hiddenTherapistIds:[...permanentlyHidden]};
+      const url=URL.createObjectURL(new Blob([JSON.stringify(body,null,2)],{type:'application/json'}));
+      const link=document.createElement('a');link.href=url;link.download='fyzion-plus-nastaveni.json';
+      root.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+      el('plus-message').textContent='Export obsahuje nastavení a ID skrytých terapeutů, nikoliv údaje pacientů.';
+    };
+    async function importPreferences(body){
+      if(searching||navigating)throw Error('Nejprve dokončete hledání nebo přechod na termín.');
+      const bundle=validateBundle(body);
+      const beforeConfig=localStorage.getItem(PLUS_KEY),beforeHidden=localStorage.getItem(SETTINGS_KEY);
+      try{
+        localStorage.setItem(PLUS_KEY,JSON.stringify(bundle.settings));
+        localStorage.setItem(SETTINGS_KEY,JSON.stringify(bundle.hiddenTherapistIds));
+      }catch(e){
+        try{if(beforeConfig===null)localStorage.removeItem(PLUS_KEY);else localStorage.setItem(PLUS_KEY,beforeConfig);
+          if(beforeHidden===null)localStorage.removeItem(SETTINGS_KEY);else localStorage.setItem(SETTINGS_KEY,beforeHidden);}catch(_){}
+        throw Error('Import se nepodařilo uložit. Zkontrolujte dostupnost úložiště prohlížeče.');
+      }
+      preferences=bundle.settings;permanentlyHidden.clear();excluded.clear();
+      for(const id of bundle.hiddenTherapistIds)permanentlyHidden.add(id);
+      settingsKey=null;selectionKey=null;clear();resultLoaded=null;
+      syncPreferenceControls();el('duration').value=String(preferences.duration);el('days').value=String(preferences.days);
+      restorePosition();applyAppearance();render();
+      el('plus-message').textContent='Nastavení bylo importováno. Předchozí nastavení bylo nahrazeno.';
+    }
+    el('plus-import').onclick=()=>el('plus-file').click();
+    el('plus-file').onchange=async()=>{
+      try{
+        const file=el('plus-file').files[0];if(!file)return;
+        if(file.size>65536)throw Error('Soubor nastavení je příliš velký (maximum 64 kB).');
+        await importPreferences(JSON.parse(await file.text()));
+      }catch(e){el('plus-message').textContent=`Import se nezdařil: ${e.message}`;}
+      finally{el('plus-file').value='';}
+    };
+    function restorePosition(){
+      if(!preferences.position)return;
+      el('widget').style.left=preferences.position.x+'px';el('widget').style.top=preferences.position.y+'px';el('widget').style.bottom='auto';
+      keepInside(el('widget'));
+    }
+    restorePosition();
+    el('plus-reset-position').onclick=()=>{
+      preferences.position=null;el('widget').style.left='20px';el('widget').style.top='auto';el('widget').style.bottom='20px';
+      keepInside(el('widget'));persistPreferences();
+    };
+
     render = () => {
+      applyAppearance();
+      el('plus-import').disabled=searching||navigating;
+      for(const k of ['contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days'])el('plus-'+k).disabled=searching||navigating;
       if (searching && resultChanges !== state.changes) controller?.abort();
       const selected = el('therapist').value;
       const allResources = state.resources || [];
@@ -550,7 +694,9 @@
       });
       const end = e => {
         if (!drag || drag.id !== e.pointerId) return;
-        suppress = drag.moved; drag = null;
+        suppress = drag.moved;
+        if(drag.moved){const box=target.getBoundingClientRect();preferences.position={x:Math.max(0,box.left),y:Math.max(0,box.top)};persistPreferences();}
+        drag = null;
         if (handle.hasPointerCapture(e.pointerId)) handle.releasePointerCapture(e.pointerId);
         setTimeout(() => { suppress = false; }, 0);
       };
