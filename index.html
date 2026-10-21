@@ -71,6 +71,238 @@
             <a class="button pink" id="install-plus" href="https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js" target="_blank" rel="noopener noreferrer">Nainstalovat Fyzion+ <span aria-hidden="true">↗</span></a>
             <p class="note">Stejný odkaz slouží i pro aktualizaci již nainstalovaného pomocníka.</p>
           </section>
+      <section id="dokumentace" class="readme-section" aria-label="Návod a dokumentace Fyzion+">
+        <div class="readme-header"><span>README.md · Návod a funkce</span><a href="https://github.com/bruhaedwin/Fyzion_upravy/blob/main/README.md" target="_blank" rel="noopener noreferrer">Zobrazit na GitHubu ↗</a></div>
+        <article id="readme-content" class="readme-markdown">
+<h1>Fyzion+</h1>
+<p>Neoficiální desktopový pomocník pro <a href="https://app.fyzion.cz/">Fyzion</a>. Přidává hledání volných termínů, plánování sérií, přípravu návštěvy z karty klienta a volitelné úpravy vzhledu.</p>
+<p><strong>Verze 1.7.49</strong> · Uživatelský skript pro Tampermonkey · České rozhraní · Kandidát na desktop stable</p>
+<blockquote>
+<p>Skript návštěvy automaticky neukládá. Výsledky hledání nejsou rezervace. Před uložením vždy zkontrolujte klienta, službu, terapeuta, místnost, délku a datum s časem.</p>
+</blockquote>
+<h2>Instalace</h2>
+<ol>
+<li>Nainstalujte <a href="https://www.tampermonkey.net/">Tampermonkey</a> do svého desktopového prohlížeče.</li>
+<li>Otevřete <a href="https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js">instalační odkaz Fyzion+</a> a potvrďte instalaci.</li>
+<li>Pokud se zobrazí pouze zdrojový kód, vytvořte nový skript v Tampermonkey, nahraďte jeho obsah celým souborem <code>fyzion-helper.user.js</code> a uložte.</li>
+<li>Přihlaste se do Fyzionu a obnovte stránku.</li>
+<li>Otevřete kalendář terapeutů, aby se načetl jejich seznam a přihlášený přístup k dostupnosti.</li>
+</ol>
+<p>Průvodce instalací: <a href="https://bruhaedwin.github.io/Fyzion_upravy/">Fyzion+ na GitHub Pages</a>.</p>
+<p>Ponechte aktivní pouze jednu kopii skriptu. Pokud prohlížeč vyžaduje zvláštní povolení uživatelských skriptů, povolte je podle pokynů Tampermonkey.</p>
+<h3>Aktualizace a návrat na předchozí verzi</h3>
+<p>Otevřete instalační odkaz a potvrďte aktualizaci, nebo nahraďte celý obsah stávajícího skriptu. Uložte a obnovte Fyzion. Verze je uvedená v záhlaví panelu Volné termíny.</p>
+<p>Před aktualizací doporučujeme export nastavení a uložení předchozího souboru skriptu. Pro návrat nahraďte obsah skriptu touto zálohou a obnovte stránku; případně obnovte i odpovídající export nastavení. Kompatibilita novějšího exportu se starší verzí není zaručená.</p>
+<p>Samostatný soubor <code>fyzion-style.user.css</code> je původní doplněk pro Stylus. Současný userscript obsahuje vlastní nastavení vzhledu. Při používání současného skriptu starý styl vypněte, aby nepřebíjel jeho přepínače.</p>
+<h2>Hlavní funkce</h2>
+<table>
+<thead>
+<tr>
+<th>Funkce</th>
+<th>Chování</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Volné termíny</td>
+<td>Hledání pro vybrané terapeuty, délky 15/30/45/60 minut a období 1–180 dní.</td>
+</tr>
+<tr>
+<td>Dostupnost klienta</td>
+<td>Omezení podle dnů týdne a času od/do.</td>
+</tr>
+<tr>
+<td>Série návštěv</td>
+<td>Kompletní i neúplné návrhy, volitelně u jednoho terapeuta, alespoň jeden celý volný den mezi návštěvami.</td>
+</tr>
+<tr>
+<td>Alternativy</td>
+<td>Nabídka jiného času nebo dne a úprava návrhu série.</td>
+</tr>
+<tr>
+<td>Kontrolní náhled</td>
+<td>Obsazenost terapeuta, navržený termín a výrazný začátek a konec pravidelné pracovní doby, včetně dělených směn.</td>
+</tr>
+<tr>
+<td>Najít termín na kartě klienta</td>
+<td>Otevření hledání s kontextem konkrétního klienta.</td>
+</tr>
+<tr>
+<td>Připravit návštěvu</td>
+<td>Otevření původního formuláře Fyzionu a doplnění údajů bez automatického uložení.</td>
+</tr>
+<tr>
+<td>Zobrazit terapeuty</td>
+<td>Pomocná volba Právě pracují, Zobrazit všechny terapeuty a Skrýt všechny terapeuty.</td>
+</tr>
+<tr>
+<td>Nastavení pod +</td>
+<td>Moduly, vzhled, výchozí hledání, seznam prohledávaných terapeutů a export/import.</td>
+</tr>
+</tbody></table>
+<h2>Hledání a série termínů</h2>
+<p>Dlaždice <strong>Volné termíny</strong> se zobrazuje v kalendáři. Na kartě klienta použijte naše tlačítko <strong>Najít termín</strong> nad původním tlačítkem nové návštěvy.</p>
+<ol>
+<li>Vyberte terapeuta nebo volbu Všichni a jednotlivé osoby v seznamu.</li>
+<li>Nastavte délku, datum začátku a případně dostupnost klienta.</li>
+<li>Rozsah období změňte v <strong>+ → Výchozí hledání</strong>.</li>
+<li>Pro sérii zapněte modul <strong>Naplánovat sérii termínů</strong>, nastavte počet a případně jednoho terapeuta.</li>
+<li>Klikněte na <strong>Najít termíny</strong> a rozbalte nalezený den nebo návrh série.</li>
+</ol>
+<p>Kliknutí na datum a čas otevře kalendář. Tlačítko Náhled načte aktuální obsazenost a pracovní rozvrh. Alternativy mohou změnit jednotlivé termíny návrhu.</p>
+<p>Návrh série nic neukládá. Hromadné ukládání celé série není součástí této verze. Výsledky starší než dvě minuty jsou označené; před použitím starších výsledků spusťte nové hledání. Vyhodnocování času používá pásmo Europe/Prague.</p>
+<h2>Příprava návštěvy z karty klienta</h2>
+<ol>
+<li>Otevřete kartu požadovaného klienta a klikněte na <strong>Najít termín</strong>.</li>
+<li>Vyhledejte termín nebo sérii a u konkrétního termínu zvolte <strong>Připravit návštěvu</strong>.</li>
+<li>Vyčkejte bez klikání a psaní do stránky. Skript ověří dostupnost, otevře formulář, počká na klienta, doplní službu, terapeuta, délku, datum a čas a znovu ověří dostupnost.</li>
+<li>Zkontrolujte všechny údaje a návštěvu uložte běžným tlačítkem Fyzionu.</li>
+</ol>
+<p>Tlačítko Připravit návštěvu se skrývá v kalendáři a u výsledků bez kontextu klienta. Původní tlačítko Najít termín uvnitř formuláře návštěvy je skryté, aby se nepletlo s tlačítkem Fyzion+ na kartě klienta.</p>
+<table>
+<thead>
+<tr>
+<th>Délka návrhu</th>
+<th>Automatická služba</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>15 minut</td>
+<td>Terapie, rozlišená údajem 15 minut v nabídce.</td>
+</tr>
+<tr>
+<td>30 minut</td>
+<td>Terapie, rozlišená údajem 30 minut v nabídce.</td>
+</tr>
+<tr>
+<td>45 minut</td>
+<td>komplexní terapie 45min, s kontrolou délky v nabídce.</td>
+</tr>
+<tr>
+<td>60 minut</td>
+<td>Automatické mapování chybí; službu vyberte ručně.</td>
+</tr>
+</tbody></table>
+<p>Při nenalezené či nejednoznačné službě může skript doplnit ostatní údaje a upozornit na ruční výběr služby. Po ruční změně služby znovu zkontrolujte délku i čas. Konečná kontrola služby používá její zobrazovaný název; nenahrazuje kontrolu správné položky uživatelem.</p>
+<p>Klienta předvyplňuje Fyzion, skript jej nepřepisuje. Existující formulář využije jen tehdy, pokud z něj dokáže ověřit odpovídající ID klienta. Jinak jej zavřete a spusťte přípravu znovu z karty. Změna klienta, stránky, formuláře nebo ruční interakce během přípravy operaci přeruší.</p>
+<p>Celkový limit přípravy je 60 sekund. Hledání má limit 90 sekund a načtení náhledu 30 sekund. Po chybě či zrušení mohou ve formuláři zůstat částečně doplněné údaje.</p>
+<h3>Hlášky přípravy</h3>
+<p>V <strong>+ → Moduly → Zobrazovat hlášky přípravy návštěvy</strong> lze vypnout průběžné i výsledné hlášky. Volba se ukládá.</p>
+<p><strong>Vypnutí potlačí také chyby a upozornění na neověřenou službu.</strong> Pro první použití, ověřování nové verze a řešení problémů ponechte hlášky zapnuté. Při jejich vypnutí nelze samotný návrat tlačítka do původního stavu považovat za potvrzení úspěšné přípravy.</p>
+<h2>Zobrazit terapeuty</h2>
+<p>Nenápadné tlačítko v kalendáři otevírá nabídku se třemi akcemi. Po zvolení akce se nabídka zavře.</p>
+<ul>
+<li><strong>Právě pracují:</strong> zahrne terapeuty v aktuální pravidelné pracovní době bez právě probíhajícího volna a také terapeuty s právě probíhající návštěvou či jinou běžnou událostí mimo rozvrh. Samotné volno, přestávka a událost zobrazovaná jako pozadí se za práci nepočítají. Probíhající běžná událost má při souběhu přednost před volnem.</li>
+<li><strong>Zobrazit všechny terapeuty:</strong> zapne všechny terapeuty povolené v nastavení Fyzion+.</li>
+<li><strong>Skrýt všechny terapeuty:</strong> vypne jejich sloupce v kalendáři.</li>
+</ul>
+<p>Právě pracují se posuzuje podle skutečného aktuálního času v Praze, nikoli podle právě prohlíženého dne kalendáře. Akce nahrazují aktuální výběr sloupců. Výběr sloupců je oddělený od terapeutů vybraných pro hledání termínů.</p>
+<h2>Nastavení pod tlačítkem +</h2>
+<table>
+<thead>
+<tr>
+<th>Sekce</th>
+<th>Nastavení</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Moduly</td>
+<td>Objednání z karty klienta, hlášky přípravy, Zobrazit terapeuty a plánování série.</td>
+</tr>
+<tr>
+<td>Vzhled Fyzionu</td>
+<td>Skrytí původního modrého tlačítka + Návštěva, kontrast a barva volna, skrytí náhledu při najetí, časové popisky, skrytí nabídky Stav návštěvy a odlišení šrafovaných událostí.</td>
+</tr>
+<tr>
+<td>Výchozí hledání</td>
+<td>Délka návštěvy a počet prohledávaných dní.</td>
+</tr>
+<tr>
+<td>Přenos na jiný počítač</td>
+<td>Export/import nastavení a obnovení polohy panelu.</td>
+</tr>
+<tr>
+<td>Terapeuti dostupní pro hledání</td>
+<td>Sbalitelný seznam osob povolených pro hledání.</td>
+</tr>
+</tbody></table>
+<p>Skrytí původního tlačítka + Návštěva jej neodstraní z aplikace; příprava návštěvy Fyzion+ jej může dál použít. Pro obnovení ručního přístupu vypněte jeho skrývání v sekci Vzhled Fyzionu.</p>
+<h3>Uložená data</h3>
+<p>V místním úložišti webu se uchovává nastavení, poloha panelu, povolení/skrytí terapeutů, výběr pro hledání a pomocný seznam ID a jmen terapeutů až na sedm dní. Dostupnost klienta se po obnovení stránky vymaže. Obsazenost se pro hledání načítá znovu.</p>
+<p>Export obsahuje společné nastavení a ID trvale skrytých terapeutů. Neobsahuje data pacientů, celý aktuální výběr terapeutů ani pomocný seznam jejich jmen. Import nahrazuje odpovídající místní nastavení. Vymazání dat webu může uložené volby odstranit.</p>
+<p>Nastavení ani pomocný seznam nejsou odděleny podle účtu/pracoviště. Při změně účtu ve stejném profilu obnovte stránku, otevřete kalendář a zkontrolujte výběr terapeutů.</p>
+<h2>Data, bezpečnost a omezení</h2>
+<ul>
+<li>Skript běží na <code>https://app.fyzion.cz/*</code> a pro dostupnost používá přihlášené GET požadavky na <code>https://api.fyzion.cz</code>.</li>
+<li>Přihlašovací hlavičky drží v paměti stránky; neukládá je do exportu ani nastavení.</li>
+<li>Uchovávaná dostupnost a vlastní náhled neobsahují jména pacientů ani poznámky. Pomocný seznam terapeutů jejich jména obsahuje.</li>
+<li>Skript neobsahuje vlastní analytiku ani odesílání údajů na jiný externí server.</li>
+<li>Hledání a náhled neověřují dostupnost místnosti ani kolize klienta u jiných terapeutů. Vycházejí z pravidelného týdenního rozvrhu a načtených událostí; nepravidelnou pracovní dobu samostatně nevyhodnocují.</li>
+<li>Ověření dostupnosti není rezervace. Jiný uživatel může mezitím termín obsadit.</li>
+<li>Nepodporované rozvrhy, nejednoznačné časy při změně letního času nebo neúplná/stránkovaná data mohou hledání zastavit.</li>
+<li>Změna rozhraní nebo API Fyzionu může vyžadovat úpravu skriptu.</li>
+<li>Jde o desktopový userscript. Mobilní používání ani matice všech prohlížečů nejsou pro tuto verzi ověřené. Neobsahuje vzdálený tisk ani samostatné rozšíření prohlížeče.</li>
+</ul>
+<h2>Řešení potíží</h2>
+<table>
+<thead>
+<tr>
+<th>Problém</th>
+<th>Postup</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fyzion+ není vidět</td>
+<td>Zkontrolujte aktivní skript, oprávnění Tampermonkey a obnovte stránku. Volné termíny se zobrazují pouze v kalendáři.</td>
+</tr>
+<tr>
+<td>Chybějí terapeuti nebo přístup k dostupnosti</td>
+<td>Otevřete běžný kalendář a počkejte na načtení. Zkontrolujte seznam Terapeuti dostupní pro hledání.</td>
+</tr>
+<tr>
+<td>Příprava se zastaví nebo zůstane částečná</td>
+<td>Zapněte hlášky přípravy, zavřete formulář a postup opakujte z karty správného klienta. Během přípravy neklikejte ani nepište.</td>
+</tr>
+<tr>
+<td>Služba není správná</td>
+<td>Vyberte ji ručně a znovu zkontrolujte délku, datum i čas.</td>
+</tr>
+<tr>
+<td>Nelze použít již otevřený formulář</td>
+<td>Zavřete jej a spusťte přípravu z karty; ID klienta nemusí být ve stávajícím formuláři ověřitelné.</td>
+</tr>
+<tr>
+<td>Výsledky jsou staré</td>
+<td>Spusťte nové hledání.</td>
+</tr>
+<tr>
+<td>Nastavení vzhledu nemá očekávaný účinek</td>
+<td>Vypněte původní styl ve Stylusu a další kopie userscriptu.</td>
+</tr>
+</tbody></table>
+<p>Při hlášení chyby uveďte verzi, postup a přesnou hlášku. Snímky anonymizujte; neposílejte přihlašovací údaje, hlavičky požadavků ani údaje pacientů.</p>
+<h2>Stav vydání a ověření</h2>
+<p>Verze 1.7.49 navazuje na uživatelské ověření běžného postupu hledání a přípravy návštěvy. Proběhly kontroly syntaxe a izolované simulace výpočtů dostupnosti, služeb, kontrol klienta, nastavení a vybraných chybových situací. Nejde o kompletní automatizované ověření živého přihlášeného Fyzionu.</p>
+<p>Před označením za stable doporučujeme:</p>
+<ol>
+<li>Zachovat rozpoznatelný výsledek přípravy i při vypnutých hláškách, například stavem tlačítka při chybě nebo nutné ruční kontrole služby.</li>
+<li>V živém Fyzionu ověřit přípravu 15/30/45 minut, ruční službu 60 minut, chybějící službu, obsazený termín, přerušení, změnu klienta, skryté původní tlačítko a import/export nastavení. Kontrolovat i údaje skutečně uloženého testovacího záznamu.</li>
+<li>Zaznamenat ověřený prohlížeč a verzi Tampermonkey a vydat shodný skript, README a archiv pod jedním označením.</li>
+</ol>
+<h3>Změny od 1.7.30</h3>
+<ul>
+<li>Opakované ověření dostupnosti před přípravou a po ní, kontrola klienta a formuláře, limit přípravy a možnost přerušení.</li>
+<li>Opravy přechodu z karty do nové návštěvy a bezpečnější zavírání nabídek ve formuláři.</li>
+<li>Zvýraznění začátku a konce pracovní doby v náhledu.</li>
+<li>Volitelné hlášky přípravy a jednotný text tlačítka Najít termíny.</li>
+<li>Kontextové zobrazení dlaždic a tlačítek, upravený vzhled Najít termín a Zobrazit terapeuty.</li>
+<li>Sbalitelný seznam terapeutů v nastavení.</li>
+<li>Zahrnutí právě probíhajících běžných událostí mimo rozvrh do volby Právě pracují.</li>
+<li>Kompaktní nabídka terapeutů se zavřením po výběru.</li>
+<li>Volitelné skrytí původního tlačítka + Návštěva v sekci Vzhled Fyzionu.</li>
+</ul>
+
+        </article>
+      </section>
           <div class="help" aria-labelledby="help-title"><h2 id="help-title">Když potřebujete poradit</h2>
             <details><summary>Po kliknutí vidím pouze text kódu</summary><p>Zkontrolujte, že je Tampermonkey nainstalovaný a zapnutý v tomto prohlížeči. Potom znovu otevřete instalační odkaz Fyzion+. Pokud Tampermonkey požaduje povolení uživatelských skriptů, postupujte podle jeho pokynů v nastavení rozšíření.</p><p><a href="https://www.tampermonkey.net/faq.php?ext=dhdg&q=Q209" target="_blank" rel="noopener noreferrer">Oficiální návod k povolení skriptů ↗</a></p></details>
             <details><summary>Přenáším nastavení z jiného počítače</summary><ol><li>Na původním počítači otevřete <strong>+ → Přenos na jiný počítač → Export nastavení</strong>.</li><li>Přeneste stažený soubor na nový počítač.</li><li>Po instalaci Fyzion+ otevřete stejné menu a zvolte <strong>Import nastavení</strong>. Vyberte přenesený soubor.</li></ol><p>Import nahradí nastavení cílového počítače, včetně výběru skrytých terapeutů.</p></details>
@@ -85,13 +317,7 @@
           </div>
         </aside>
       </div>
-      <section id="dokumentace" class="readme-section" aria-label="Návod a dokumentace Fyzion+">
-        <div class="readme-header"><span>README.md · Návod a funkce</span><a href="https://github.com/bruhaedwin/Fyzion_upravy/blob/main/README.md" target="_blank" rel="noopener noreferrer">Zobrazit na GitHubu ↗</a></div>
-        <article class="readme-markdown">
-{% capture readme_content %}{% include_relative README.md %}{% endcapture %}
-{{ readme_content | markdownify }}
-        </article>
-      </section>
+
     </main>
     <footer><span>Fyzion+ · Vlastní úpravy Rehabilitace Borovany.<br>Samostatný doplněk, není oficiální součástí Fyzionu.</span><a href="https://github.com/bruhaedwin/Fyzion_upravy" target="_blank" rel="noopener noreferrer">Soubory a nové verze na GitHubu ↗</a></footer>
   </div>
@@ -119,5 +345,7 @@
       });
     })();
   </script>
+  <script src="assets/marked.umd.js"></script>
+  <script src="assets/readme.js"></script>
 </body>
 </html>
