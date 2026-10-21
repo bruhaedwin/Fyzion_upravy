@@ -138,15 +138,6 @@ Nastavení ani pomocný seznam nejsou odděleny podle účtu/pracoviště. Při 
 
 Při hlášení chyby uveďte verzi, postup a přesnou hlášku. Snímky anonymizujte; neposílejte přihlašovací údaje, hlavičky požadavků ani údaje pacientů.
 
-## Stav vydání a ověření
-
-Verze 1.7.49 navazuje na uživatelské ověření běžného postupu hledání a přípravy návštěvy. Proběhly kontroly syntaxe a izolované simulace výpočtů dostupnosti, služeb, kontrol klienta, nastavení a vybraných chybových situací. Nejde o kompletní automatizované ověření živého přihlášeného Fyzionu.
-
-Před označením za stable doporučujeme:
-
-1. Zachovat rozpoznatelný výsledek přípravy i při vypnutých hláškách, například stavem tlačítka při chybě nebo nutné ruční kontrole služby.
-2. V živém Fyzionu ověřit přípravu 15/30/45 minut, ruční službu 60 minut, chybějící službu, obsazený termín, přerušení, změnu klienta, skryté původní tlačítko a import/export nastavení. Kontrolovat i údaje skutečně uloženého testovacího záznamu.
-3. Zaznamenat ověřený prohlížeč a verzi Tampermonkey a vydat shodný skript, README a archiv pod jedním označením.
 
 ### Změny od 1.7.30
 
