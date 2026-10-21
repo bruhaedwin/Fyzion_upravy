@@ -29,13 +29,33 @@
     @media(max-width:800px){.layout{grid-template-columns:1fr}.sidebar{grid-template-columns:1fr 1fr;gap:22px}.hero{padding-top:36px}h1{letter-spacing:-1.4px}}
     @media(max-width:520px){.shell{width:calc(100% - 32px)}.topbar{padding:20px 0;align-items:flex-start}.topbar p{max-width:140px;text-align:right;font-size:11px}.hero{padding:32px 0 28px}.lead{font-size:16px}.card{padding:23px 20px}.sidebar{grid-template-columns:1fr}.actions{gap:13px}.button{width:100%}.skip{display:block}.browser-row{display:block}.browser-row label{display:block;margin-bottom:6px}.browser-row select{width:100%}footer{display:block}footer a{display:inline-block;margin-top:8px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button{transition:none}}
+    .readme-section{margin:8px 0 48px;border:1px solid #d1d9e0;border-radius:8px;background:#fff;overflow:hidden}
+    .readme-header{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:12px 20px;background:#f6f8fa;border-bottom:1px solid #d1d9e0;font:600 14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1f2328}
+    .readme-header a{font-size:13px;font-weight:400;color:#0969da}
+    .readme-markdown{padding:32px;overflow-wrap:break-word;color:#1f2328;background:#fff;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}
+    .readme-markdown>:first-child{margin-top:0!important}.readme-markdown>:last-child{margin-bottom:0!important}
+    .readme-markdown h1,.readme-markdown h2,.readme-markdown h3,.readme-markdown h4{margin:24px 0 16px;font-weight:600;line-height:1.25;letter-spacing:normal;max-width:none;color:#1f2328}
+    .readme-markdown h1{font-size:2em;padding-bottom:.3em;border-bottom:1px solid #d1d9e0}
+    .readme-markdown h2{font-size:1.5em;padding-bottom:.3em;border-bottom:1px solid #d1d9e0}
+    .readme-markdown h3{font-size:1.25em}.readme-markdown h4{font-size:1em}
+    .readme-markdown p,.readme-markdown blockquote,.readme-markdown ul,.readme-markdown ol,.readme-markdown table,.readme-markdown pre{margin:0 0 16px}
+    .readme-markdown ul,.readme-markdown ol{padding-left:2em}.readme-markdown li+li{margin-top:.25em}.readme-markdown li>p{margin-top:16px}
+    .readme-markdown a{color:#0969da;text-decoration:none}.readme-markdown a:hover{text-decoration:underline}.readme-markdown strong{font-weight:600}
+    .readme-markdown blockquote{padding:0 1em;color:#59636e;border-left:.25em solid #d1d9e0}.readme-markdown blockquote>:last-child{margin-bottom:0}
+    .readme-markdown code{padding:.2em .4em;border-radius:6px;background:#818b981f;font:85% ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;white-space:break-spaces}
+    .readme-markdown pre{padding:16px;overflow:auto;border-radius:6px;background:#f6f8fa;font-size:85%;line-height:1.45}.readme-markdown pre code{padding:0;background:transparent;white-space:pre}
+    .readme-markdown table{display:block;width:max-content;max-width:100%;overflow:auto;border-spacing:0;border-collapse:collapse}
+    .readme-markdown th,.readme-markdown td{padding:6px 13px;border:1px solid #d1d9e0}.readme-markdown th{font-weight:600}.readme-markdown tr{background:#fff;border-top:1px solid #d1d9e0}.readme-markdown tr:nth-child(2n){background:#f6f8fa}
+    .readme-markdown img{max-width:100%;height:auto}.readme-markdown hr{height:.25em;padding:0;margin:24px 0;background:#d1d9e0;border:0}
+    .docs-link{display:inline-block;margin-top:18px;font-size:14px}
+    @media(max-width:520px){.readme-markdown{padding:20px 16px;font-size:14px}.readme-header{padding:12px 16px;flex-wrap:wrap}.readme-markdown h1{font-size:1.75em}}
   </style>
 </head>
 <body>
   <div class="shell">
     <header class="topbar"><div class="brand"><i class="mark" aria-hidden="true"></i><div>Fyzion<span>+</span></div></div><p>Rehabilitace Borovany<br>Průvodce instalací</p></header>
     <main>
-      <section class="hero" aria-labelledby="title"><p class="eyebrow">Vše potřebné na jednom místě</p><h1>Fyzion<span>+</span></h1><p class="lead">Přidejte do Fyzionu přehlednější kalendář a hledání volných termínů. Na novém počítači stačí dva instalační kroky.</p></section>
+      <section class="hero" aria-labelledby="title"><p class="eyebrow">Vše potřebné na jednom místě</p><h1>Fyzion<span>+</span></h1><p class="lead">Přidejte do Fyzionu přehlednější kalendář a hledání volných termínů. Na novém počítači stačí dva instalační kroky.</p><a class="docs-link" href="#dokumentace">Návod, funkce a nastavení ↓</a></section>
       <div class="layout">
         <div class="steps">
           <section class="card" id="step1" aria-labelledby="step1-title">
@@ -53,18 +73,25 @@
           </section>
           <div class="help" aria-labelledby="help-title"><h2 id="help-title">Když potřebujete poradit</h2>
             <details><summary>Po kliknutí vidím pouze text kódu</summary><p>Zkontrolujte, že je Tampermonkey nainstalovaný a zapnutý v tomto prohlížeči. Potom znovu otevřete instalační odkaz Fyzion+. Pokud Tampermonkey požaduje povolení uživatelských skriptů, postupujte podle jeho pokynů v nastavení rozšíření.</p><p><a href="https://www.tampermonkey.net/faq.php?ext=dhdg&q=Q209" target="_blank" rel="noopener noreferrer">Oficiální návod k povolení skriptů ↗</a></p></details>
-            <details><summary>Přenáším nastavení z jiného počítače</summary><ol><li>Na původním počítači otevřete <strong>Volné termíny → Nastavení Fyzion+ → Přenos na jiný počítač → Export nastavení</strong>.</li><li>Přeneste stažený soubor na nový počítač.</li><li>Po instalaci Fyzion+ otevřete stejné menu a zvolte <strong>Import nastavení</strong>. Vyberte přenesený soubor.</li></ol><p>Import nahradí nastavení cílového počítače, včetně výběru skrytých terapeutů.</p></details>
+            <details><summary>Přenáším nastavení z jiného počítače</summary><ol><li>Na původním počítači otevřete <strong>+ → Přenos na jiný počítač → Export nastavení</strong>.</li><li>Přeneste stažený soubor na nový počítač.</li><li>Po instalaci Fyzion+ otevřete stejné menu a zvolte <strong>Import nastavení</strong>. Vyberte přenesený soubor.</li></ol><p>Import nahradí nastavení cílového počítače, včetně výběru skrytých terapeutů.</p></details>
             <details><summary>Na tomto počítači už používám starší úpravy</summary><p>Ve Stylusu vypněte původní styly pro Fyzion. Jejich vzhled už spravuje Fyzion+. V Tampermonkey ponechte zapnutou pouze jednu aktuální kopii pomocníka. Potom obnovte Fyzion.</p></details>
             <details><summary>Jak dostanu další aktualizace?</summary><p>V nastavení Tampermonkey ponechte zapnuté automatické kontroly aktualizací. Nové verze si stáhne ze stejného repozitáře na GitHubu. Po aktualizaci obnovte Fyzion. Nastavení tohoto počítače zůstává uložené.</p></details>
           </div>
         </div>
         <aside class="sidebar" aria-label="Po instalaci a přehled funkcí">
-          <section class="finish"><h2>Potom otevřete Fyzion</h2><p>Přihlaste se a obnovte stránku. Najdete přesouvatelné tlačítko <strong>Volné termíny</strong> a v něm <strong>Nastavení Fyzion+</strong>.</p><a class="button" href="https://app.fyzion.cz/" target="_blank" rel="noopener noreferrer">Otevřít Fyzion <span aria-hidden="true">↗</span></a></section>
+          <section class="finish"><h2>Potom otevřete Fyzion</h2><p>Přihlaste se a obnovte stránku. V kalendáři najdete tlačítko <strong>Volné termíny</strong>. Nastavení otevřete tlačítkem <strong>+</strong>; na kartě klienta použijte <strong>Najít termín</strong>.</p><a class="button" href="https://app.fyzion.cz/" target="_blank" rel="noopener noreferrer">Otevřít Fyzion <span aria-hidden="true">↗</span></a></section>
           <div class="side-note"><h3>Co budete mít po ruce</h3><ul class="benefits"><li>Hledání volných termínů</li><li>Čitelnější kalendář a barvy</li><li>Výběr terapeutů pro hledání</li><li>Přenos nastavení mezi počítači</li></ul><p>Stylus pro tyto úpravy nepotřebujete. Každou instalaci potvrdíte v prohlížeči.</p>
             <div class="share"><h3>Další počítač?</h3><p>Pošlete na něj odkaz na tuto stránku.</p><button id="copy-link" type="button">Zkopírovat instalační stránku <span aria-hidden="true">↗</span></button><div class="live" id="copy-status" role="status"></div><input class="copy-fallback" id="copy-fallback" aria-label="Adresa instalační stránky k ručnímu zkopírování" readonly hidden></div>
           </div>
         </aside>
       </div>
+      <section id="dokumentace" class="readme-section" aria-label="Návod a dokumentace Fyzion+">
+        <div class="readme-header"><span>README.md · Návod a funkce</span><a href="https://github.com/bruhaedwin/Fyzion_upravy/blob/main/README.md" target="_blank" rel="noopener noreferrer">Zobrazit na GitHubu ↗</a></div>
+        <article class="readme-markdown">
+{% capture readme_content %}{% include_relative README.md %}{% endcapture %}
+{{ readme_content | markdownify }}
+        </article>
+      </section>
     </main>
     <footer><span>Fyzion+ · Vlastní úpravy Rehabilitace Borovany.<br>Samostatný doplněk, není oficiální součástí Fyzionu.</span><a href="https://github.com/bruhaedwin/Fyzion_upravy" target="_blank" rel="noopener noreferrer">Soubory a nové verze na GitHubu ↗</a></footer>
   </div>
