@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fyzion+
 // @namespace    local.fyzion.helpers
-// @version      1.7.49
+// @version      1.8.0
 // @homepageURL  https://github.com/bruhaedwin/Fyzion_upravy
 // @description  Fyzion+ – společné menu vzhledu a volných termínů, nastavení a přenos mezi počítači.
 // @match        https://app.fyzion.cz/*
@@ -40,6 +40,16 @@
   }
   function nextDay(date) { return new Date(Date.parse(`${date}T12:00:00Z`) + 86400000).toISOString().slice(0, 10); }
   function addDays(date, count) { return new Date(Date.parse(`${date}T12:00:00Z`) + count * 86400000).toISOString().slice(0, 10); }
+  function voucherFirstBefore(enabled, date) {
+    if (!enabled) return Infinity;
+    const parsed = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? Date.parse(`${date}T12:00:00Z`) : NaN;
+    if (!Number.isFinite(parsed) || date.startsWith('0000') || new Date(parsed).toISOString().slice(0, 10) !== date)
+      throw Error('Vyberte platné datum v poli Vystavení FT poukazu.');
+    // Exclusive midnight after the inclusive 40th calendar day (Prague time).
+    const deadline = addDays(date, 41);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(deadline)) throw Error('Datum vystavení FT poukazu je mimo podporovaný rozsah.');
+    return localMs(deadline, '00:00:00');
+  }
   function rangeChunks(date, days) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isInteger(days) || days < 1 || days > 180)
       throw Error('Vyberte datum a rozsah 1–180 dní.');
@@ -149,6 +159,20 @@
     if(prefs.from&&prefs.to&&prefs.from>=prefs.to)throw Error('Čas Od musí být dříve než Do.');
     return{days:[...new Set(prefs.days)],from:prefs.from,to:prefs.to};
   }
+  function extraOfficePeriods(resource, events, from, to) {
+    const periods=[];
+    for(const e of events){
+      if(e.extendedProps?.event_type!=='ExtraOfficeHours')continue;
+      const ids=Array.isArray(e.resourceIds)?e.resourceIds:[e.resourceId||e.extendedProps?.user_id];
+      if(!ids.length||ids.some(id=>typeof id!=='string'||!id))throw Error('Nepravidelnou pracovní dobu nelze přiřadit terapeutovi.');
+      if(!ids.includes(resource.id))continue;
+      const start=instant(e.start),end=instant(e.end);
+      if(start>=end)throw Error('Nepravidelná pracovní doba má neplatnou délku.');
+      const a=Math.max(from,start),b=Math.min(to,end);
+      if(a<b)periods.push([a,b]);
+    }
+    return periods;
+  }
   function patientAllows(slot,prefs){
     if(!prefs)return true;
     const start=parts(slot.start),end=parts(slot.end),day=new Date(start.date+'T12:00:00Z').getUTCDay();
@@ -156,7 +180,7 @@
     const seconds=time=>{const [h,m,s=0]=time.split(':').map(Number);return h*3600+m*60+s;};
     return seconds(start.time)>=(prefs.from?seconds(prefs.from):0)&&seconds(end.time)<=(prefs.to?seconds(prefs.to):86400);
   }
-  function findSlots({ resource, events, from, to, duration, now = Date.now(), limit = 150, patientPreferences=null }) {
+  function findSlots({ resource, events, from, to, duration, now = Date.now(), limit = 150, patientPreferences=null, includeOvertime=true }) {
     if(patientPreferences)patientPreferences=validatePatientPreferences(patientPreferences);
     if (!Number.isInteger(duration) || duration < 1 || duration > 480) throw Error('Délka musí být 1–480 minut.');
     if (!(from < to) || to - from > 180 * 86400000 + 3600000) throw Error('Podporované období je nejvýše 180 dnů.');
@@ -172,11 +196,13 @@
       if (r.resourceId && r.resourceId !== resource.id) throw Error('Rozvrh neodpovídá terapeutovi.');
       if (r.startTime >= r.endTime) throw Error('Noční nebo nulová směna zatím není podporována.');
     }
+    const work = includeOvertime?extraOfficePeriods(resource,events,from,to):[];
     const busy = [];
     for (const e of events) {
       const ids = Array.isArray(e.resourceIds) ? e.resourceIds : [e.resourceId || e.extendedProps?.user_id];
       if (!ids.length || ids.some(id => typeof id !== 'string' || !id)) throw Error('Některé události nelze přiřadit terapeutovi.');
       if (!ids.includes(resource.id)) continue;
+      if (e.extendedProps?.event_type === 'ExtraOfficeHours') continue;
       if (e.display === 'inverse-background' || e.recurrence_settings && (!e.start || !e.end))
         throw Error('Událost obsahuje nepodporované pravidlo dostupnosti.');
       const a = instant(e.start), b = instant(e.end);
@@ -184,7 +210,6 @@
       busy.push([a, b]); // Každý záznam blokuje čas, bez ohledu na typ, barvu či kapacitu.
     }
     const blocked = merge(busy);
-    const work = [];
     for (let date = parts(from).date; localMs(date, '00:00:00') < to; date = nextDay(date)) {
       const dow = new Date(`${date}T12:00:00Z`).getUTCDay();
       for (const r of rules.filter(r => r.daysOfWeek.includes(dow))) {
@@ -207,14 +232,14 @@
     }
     return { slots: output, more };
   }
-  function findAllSlots({ resources, events, from, to, duration, now = Date.now(), limit = 10000, patientPreferences=null }) {
+  function findAllSlots({ resources, events, from, to, duration, now = Date.now(), limit = 10000, patientPreferences=null, includeOvertime=true }) {
     const slots = [], ids = new Set();
     let more = false;
     for (const resource of resources) {
       if (!resource || typeof resource.id !== 'string' || !resource.id || ids.has(resource.id)) throw Error('Neplatný seznam terapeutů.');
       ids.add(resource.id);
       let result;
-      try { result = findSlots({ resource, events, from, to, duration, now, limit, patientPreferences }); }
+      try { result = findSlots({ resource, events, from, to, duration, now, limit, patientPreferences, includeOvertime }); }
       catch (e) { throw Error(`${resource.title || 'Terapeut'}: ${e.message}`); }
       more ||= result.more;
       slots.push(...result.slots.map(slot => ({ ...slot, resourceId: resource.id, title: String(resource.title || 'Terapeut') })));
@@ -223,9 +248,9 @@
     return { slots: slots.slice(0, limit), more: more || slots.length > limit };
   }
   const PLUS_TIME_CSS = "/* Fyzion: casy pod udalostmi a nepruhlednym volnem.\n   Zkusebni varianta pro osu 00:00-24:00 po 15 minutach.\n   Pridat do existujiciho stylu omezeneho na web Fyzionu. */\n.fc:has(.fc-timegrid-slots tr:first-child [data-time=\"00:00:00\"]):has(.fc-timegrid-slots tr:last-child [data-time=\"23:45:00\"]):has(.fc-timegrid-slots tr:nth-child(96):last-child) .fc-timegrid-col:not(.fc-timegrid-axis) .fc-timegrid-col-frame::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  z-index: 0;\n  pointer-events: none;\n  background-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%222765%22%20viewBox%3D%220%200%20240%202765%22%20preserveAspectRatio%3D%22none%22%3E%3Cg%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2210%22%20fill%3D%22%23777777%22%3E%3Ctext%20x%3D%226%22%20y%3D%2212%22%3E00%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2240.802%22%3E00%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2269.604%22%3E00%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2298.406%22%3E00%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22127.208%22%3E01%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22156.01%22%3E01%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22184.812%22%3E01%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22213.615%22%3E01%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22242.417%22%3E02%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22271.219%22%3E02%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22300.021%22%3E02%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22328.823%22%3E02%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22357.625%22%3E03%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22386.427%22%3E03%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22415.229%22%3E03%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22444.031%22%3E03%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22472.833%22%3E04%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22501.635%22%3E04%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22530.437%22%3E04%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22559.24%22%3E04%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22588.042%22%3E05%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22616.844%22%3E05%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22645.646%22%3E05%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22674.448%22%3E05%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22703.25%22%3E06%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22732.052%22%3E06%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22760.854%22%3E06%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22789.656%22%3E06%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22818.458%22%3E07%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22847.26%22%3E07%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22876.062%22%3E07%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22904.865%22%3E07%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22933.667%22%3E08%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22962.469%22%3E08%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22991.271%22%3E08%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221020.073%22%3E08%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221048.875%22%3E09%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221077.677%22%3E09%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221106.479%22%3E09%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221135.281%22%3E09%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221164.083%22%3E10%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221192.885%22%3E10%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221221.687%22%3E10%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221250.49%22%3E10%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221279.292%22%3E11%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221308.094%22%3E11%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221336.896%22%3E11%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221365.698%22%3E11%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221394.5%22%3E12%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221423.302%22%3E12%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221452.104%22%3E12%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221480.906%22%3E12%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221509.708%22%3E13%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221538.51%22%3E13%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221567.312%22%3E13%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221596.115%22%3E13%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221624.917%22%3E14%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221653.719%22%3E14%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221682.521%22%3E14%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221711.323%22%3E14%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221740.125%22%3E15%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221768.927%22%3E15%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221797.729%22%3E15%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221826.531%22%3E15%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221855.333%22%3E16%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221884.135%22%3E16%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221912.937%22%3E16%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221941.74%22%3E16%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221970.542%22%3E17%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221999.344%22%3E17%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222028.146%22%3E17%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222056.948%22%3E17%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222085.75%22%3E18%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222114.552%22%3E18%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222143.354%22%3E18%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222172.156%22%3E18%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222200.958%22%3E19%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222229.76%22%3E19%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222258.562%22%3E19%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222287.365%22%3E19%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222316.167%22%3E20%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222344.969%22%3E20%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222373.771%22%3E20%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222402.573%22%3E20%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222431.375%22%3E21%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222460.177%22%3E21%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222488.979%22%3E21%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222517.781%22%3E21%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222546.583%22%3E22%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222575.385%22%3E22%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222604.187%22%3E22%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222632.99%22%3E22%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222661.792%22%3E23%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222690.594%22%3E23%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222719.396%22%3E23%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222748.198%22%3E23%3A45%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E\");\n  background-repeat: no-repeat;\n background-size: 240px 100%;\nbackground-position: left top;\n}";
-  const PLUS_VERSION = '1.7.49';
+  const PLUS_VERSION = '1.8.0';
   const PLUS_KEY = 'fyzion-plus-preferences-v1';
-  const PLUS_DEFAULTS = Object.freeze({rangeExpanded:true,firstWithin40:false,seriesModule:false,seriesCount:5,seriesSingle:true,therapistsModule:true,bookingModule:true,hideNativeVisitButton:false,showPreparationMessages:true,contrast:true,hidePopup:true,timeLabels:true,hideVisitStatus:true,hatch:true,
+  const PLUS_DEFAULTS = Object.freeze({rangeExpanded:true,includeOvertime:true,firstWithin40:false,seriesModule:false,seriesCount:5,seriesSingle:true,therapistsModule:true,bookingModule:true,hideNativeVisitButton:false,showPreparationMessages:true,contrast:true,hidePopup:true,timeLabels:true,hideVisitStatus:true,hatch:true,
     offColor:'#bfc3ca',hatchColor:'#b9ddf5',duration:30,days:90,position:null});
   function validatePreferences(input) {
     if (!input || typeof input !== 'object' || Array.isArray(input)) throw Error('Neplatné nastavení.');
@@ -233,7 +258,7 @@
     const {seriesSpacing:legacySpacing,nativeTherapistPicker:legacyNativePicker,...current}=input;
     if (Object.keys(current).some(k => !Object.hasOwn(PLUS_DEFAULTS,k))) throw Error('Soubor obsahuje neznámé nastavení.');
     const out = {...PLUS_DEFAULTS,...current};
-    for (const k of ['rangeExpanded','firstWithin40','seriesModule','seriesSingle','therapistsModule','bookingModule','hideNativeVisitButton','showPreparationMessages','contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) if (typeof out[k] !== 'boolean') throw Error('Neplatný přepínač nastavení.');
+    for (const k of ['rangeExpanded','includeOvertime','firstWithin40','seriesModule','seriesSingle','therapistsModule','bookingModule','hideNativeVisitButton','showPreparationMessages','contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) if (typeof out[k] !== 'boolean') throw Error('Neplatný přepínač nastavení.');
     if(!Number.isInteger(out.seriesCount)||out.seriesCount<1||out.seriesCount>30)throw Error('Počet termínů musí být 1–30.');
     for (const k of ['offColor','hatchColor']) if (!/^#[0-9a-f]{6}$/i.test(out[k])) throw Error('Neplatná barva.');
     if (![15,30,45,60].includes(out.duration) || !Number.isInteger(out.days) || out.days<1 || out.days>180) throw Error('Neplatná délka nebo rozsah hledání.');
@@ -266,7 +291,7 @@
     // Probíhající návštěva je důvodem k zobrazení i mimo pravidelný rozvrh.
     // Samotné volno/přestávka se za práci nepovažuje.
     for(const event of events){
-      if(event.extendedProps?.event_type==='time_off'||event.display==='background'||event.display==='inverse-background')continue;
+      if(event.extendedProps?.event_type==='ExtraOfficeHours'||event.extendedProps?.event_type==='time_off'||event.display==='background'||event.display==='inverse-background')continue;
       const ids=Array.isArray(event.resourceIds)?event.resourceIds:[event.resourceId||event.extendedProps?.user_id];
       if(!ids.includes(resource.id))continue;
       const start=instant(event.start),end=instant(event.end);
@@ -277,9 +302,10 @@
     try{findSlots({resource:{...resource,businessHours:rules},events:[],from,to,duration:1,now:from,limit:1});}
     catch(e){throw Error((resource.title||resource.id||'Terapeut')+': '+e.message);}
     const today=rules.filter(r=>r.daysOfWeek.includes(day));
-    const hours=today.map(r=>r.startTime.slice(0,5)+'–'+r.endTime.slice(0,5)).join(', ');
-    if(!today.length)return{working:false,reason:'Dnes nemá nastavenou pracovní dobu.'};
-    if(!today.some(r=>localMs(date,r.startTime)<=now&&now<localMs(date,r.endTime)))return{working:false,reason:'Mimo dnešní pracovní dobu ('+hours+').'};
+    const periods=merge([...today.map(r=>[localMs(date,r.startTime),localMs(date,r.endTime)]),...extraOfficePeriods(resource,events,from,to)]);
+    const hours=periods.map(([a,b])=>parts(a).time.slice(0,5)+'–'+parts(b).time.slice(0,5)).join(', ');
+    if(!periods.length)return{working:false,reason:'Dnes nemá nastavenou pracovní dobu.'};
+    if(!periods.some(([a,b])=>a<=now&&now<b))return{working:false,reason:'Mimo dnešní pracovní dobu ('+hours+').'};
     for(const e of events){
       if(e.extendedProps?.event_type!=='time_off')continue;
       const ids=Array.isArray(e.resourceIds)?e.resourceIds:[e.resourceId||e.extendedProps?.user_id];
@@ -390,21 +416,21 @@
     const match = /^\/patients\/(?:detail\/)?([0-9]+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/|$)/i.exec(pathname);
     return match ? match[1] : null;
   }
-  function previewModel(slot, resource, events, now = Date.now()) {
+  function previewModel(slot, resource, events, now = Date.now(), includeOvertime=true) {
     if (!slot || slot.resourceId !== resource.id || !Number.isFinite(slot.start) || !Number.isFinite(slot.end) || slot.end <= slot.start)
       throw Error('Neplatný termín náhledu.');
     const date = parts(slot.start).date;
     const from = localMs(date, '00:00:00'), to = localMs(nextDay(date), '00:00:00');
     const duration = (slot.end - slot.start) / MIN;
-    const result = findSlots({ resource, events, from: slot.start, to: slot.end, duration, now, limit: 2 });
+    const result = findSlots({ resource, events, from: slot.start, to: slot.end, duration, now, limit: 2, includeOvertime });
     const free = result.slots.some(s => s.start === slot.start && s.end === slot.end);
-    const busy = events.filter(e => (Array.isArray(e.resourceIds) ? e.resourceIds : [e.resourceId || e.extendedProps?.user_id]).includes(resource.id))
+    const busy = events.filter(e => e.extendedProps?.event_type!=='ExtraOfficeHours' && (Array.isArray(e.resourceIds) ? e.resourceIds : [e.resourceId || e.extendedProps?.user_id]).includes(resource.id))
       .map(e => ({ start: instant(e.start), end: instant(e.end) }))
       .filter(e => e.start < to && e.end > from).map(e => ({start: Math.max(from,e.start),end: Math.min(to,e.end)}));
     const weekday=new Date(date+'T12:00:00Z').getUTCDay();
-    const working=merge(workRules(resource).filter(rule=>rule.daysOfWeek.includes(weekday))
+    const working=merge([...(includeOvertime?extraOfficePeriods(resource,events,from,to):[]),...workRules(resource).filter(rule=>rule.daysOfWeek.includes(weekday))
       .map(rule=>[Math.max(from,localMs(date,rule.startTime)),Math.min(to,localMs(date,rule.endTime))])
-      .filter(([start,end])=>start<end)).map(([start,end])=>({start,end}));
+      .filter(([start,end])=>start<end)]).map(([start,end])=>({start,end}));
     return { date, from, to, free, busy, working };
   }
   if (typeof window === 'undefined') {
@@ -473,7 +499,7 @@
         // Ukládáme pouze dostupnost. Jména pacientů ani poznámky nepřebíráme.
         const events = values.map(e => ({ start: e.start, end: e.end, resourceId: e.resourceId,
           resourceIds: e.resourceIds, display: e.display, recurrence_settings: e.recurrence_settings,
-          extendedProps: { user_id: e.extendedProps?.user_id } }));
+          extendedProps: { user_id: e.extendedProps?.user_id, event_type: e.extendedProps?.event_type } }));
         state.batch = { from, to, ids, events, loaded: Date.now() };
       }
     } catch (e) {
@@ -858,7 +884,7 @@
   function serviceForDuration(minutes) {
     return ({15:'Terapie',30:'Terapie',45:'komplexní terapie 45min'})[minutes]||null;
   }
-  async function verifyVisitSlot(slot, signal, check) {
+  async function verifyVisitSlot(slot, signal, check, includeOvertime=true) {
     check();
     if(!slot||!Number.isFinite(slot.start)||slot.start<=Date.now())throw Error('Termín již začal nebo není platný. Vyhledejte nový.');
     if(!state.transport)throw Error('Chybí přihlášení. Otevřete kalendář.');
@@ -871,9 +897,9 @@
     url.searchParams.set('start',new Date(localMs(date,'00:00:00')).toISOString());
     url.searchParams.set('end',new Date(localMs(nextDay(date),'00:00:00')).toISOString());url.searchParams.append('user_ids',slot.resourceId);
     const events=availabilityOnly(arrayOf(await readApi(url,auth,signal)));check();
-    if(!previewModel(slot,resource,events).free)throw Error('Termín již není volný. Spusťte nové hledání.');
+    if(!previewModel(slot,resource,events,Date.now(),includeOvertime).free)throw Error('Termín již není volný. Spusťte nové hledání.');
   }
-  async function prepareVisit(slot, patientId, progress=()=>{}, signal) {
+  async function prepareVisit(slot, patientId, progress=()=>{}, signal, includeOvertime=true) {
     const path=location.pathname,deadline=Date.now()+60000;
     if(!patientId||patientCardKey(path)!==patientId)throw Error('Spusťte přípravu z karty požadovaného klienta.');
     let boundForm=null,clientSignature=null,contextPath=path,openingFromCard=false;
@@ -909,7 +935,7 @@
     };
     try {
       progress('Ověřuji aktuální dostupnost termínu…');
-      await verifyVisitSlot(slot,signal,check);check();
+      await verifyVisitSlot(slot,signal,check,includeOvertime);check();
       progress('Otevírám formulář návštěvy…');
       await openVisitFromCard(patientId,check,()=>{openingFromCard=true;});
       progress('Čekám na dokončení načítání formuláře…');
@@ -970,7 +996,7 @@
     ]);
     check();const confirmedValues=valueSignature();
     progress('Znovu ověřuji dostupnost připraveného termínu…');
-    await verifyVisitSlot(slot,signal,check);check();
+    await verifyVisitSlot(slot,signal,check,includeOvertime);check();
     if(valueSignature()!==confirmedValues)throw Error('Údaje formuláře se během závěrečného ověření změnily. Zkontrolujte je a spusťte přípravu znovu.');
     const client=visitField(form,'Klient').querySelector('.q-field__native .ellipsis')?.textContent.trim();
     return 'Předvyplněno datum, čas, délka a terapeut. '+(client?'Klient předvyplněný Fyzionem zůstal zachovaný.':'Klient není vybraný — doplňte jej nebo otevřete návštěvu z karty klienta.')+(serviceSelected?' Služba: '+requestedService+'.':' POZOR: služba není automaticky ověřená — vyberte ji ručně a zkontrolujte potom čas i délku.')+' Zkontrolujte místnost a všechny údaje. Návštěva není uložená.';
@@ -1052,10 +1078,10 @@
       <button id="therapists-now" type="button">Právě pracují</button><button id="therapists-all" type="button">Zobrazit všechny terapeuty</button><button id="therapists-none" type="button">Skrýt všechny terapeuty</button>
       <p class="muted">Pracuje pouze s terapeuty povolenými v Nastavení Fyzion+. Právě pracují: skutečný dnešní čas v Praze. Zahrnuje terapeuty v pracovní době bez volna a terapeuty s právě probíhající návštěvou či jinou událostí i mimo rozvrh. Samotné volno nebo přestávka se za práci nepočítá. Volba nahradí aktuální výběr sloupců.</p><p id="therapists-message" class="muted" role="status"></p><details id="therapists-diagnostics" hidden><summary>Proč se terapeut zobrazuje nebo nezobrazuje?</summary><p id="therapists-check-time" class="muted"></p><ul id="therapists-reasons"></ul></details></section>
     <section id="panel" hidden><div id="heading" title="Přetažením přesunete okno"><h2>Volné termíny <small style="font-size:11px;color:#777">Fyzion+ ${PLUS_VERSION}</small></h2><button id="close" aria-label="Zavřít">×</button></div>
-      <p class="muted">Běžný týdenní rozvrh bez nepravidelné pracovní doby. Praha. Začátky po 15 minutách. Nic se automaticky nerezervuje.</p>
+      <p id="work-scope-note" class="muted"></p>
       <button id="settings-toggle" type="button" aria-expanded="false">Nastavení Fyzion+</button>
       <div id="settings" hidden>
-      <details open><summary>Moduly</summary><div class="plus-switches"><label><input id="plus-bookingModule" type="checkbox">Objednání z karty klienta</label><label><input id="plus-showPreparationMessages" type="checkbox">Zobrazovat hlášky přípravy návštěvy</label><label><input id="plus-therapistsModule" type="checkbox">Zobrazit terapeuty</label><label><input id="plus-seriesModule" type="checkbox">Naplánovat sérii termínů</label></div><p class="muted">Série přidá do Volných termínů počet návštěv a volbu jednoho terapeuta. Vypnutí zobrazení terapeutů nezmění aktuální výběr sloupců.</p></details>
+      <details open><summary>Moduly</summary><div class="plus-switches"><label><input id="plus-bookingModule" type="checkbox">Objednání z karty klienta</label><label><input id="plus-showPreparationMessages" type="checkbox">Zobrazovat hlášky přípravy návštěvy</label><label><input id="plus-therapistsModule" type="checkbox">Zobrazit terapeuty</label><label><input id="plus-seriesModule" type="checkbox">Naplánovat sérii termínů</label><label><input id="plus-includeOvertime" type="checkbox">Zahrnout nepravidelnou pracovní dobu (přesčas)</label></div><p class="muted">Série přidá do Volných termínů počet návštěv a volbu jednoho terapeuta. Vypnutí zobrazení terapeutů nezmění aktuální výběr sloupců.</p></details>
       <details open><summary>Vzhled Fyzionu</summary><div class="plus-switches">
         <label><input id="plus-hideNativeVisitButton" type="checkbox">Skrýt původní tlačítko + Návštěva</label>
         <label><input id="plus-contrast" type="checkbox">Výraznější volno</label>
@@ -1077,7 +1103,8 @@
         <button id="plus-reset-position" type="button">Vrátit polohu panelu</button>
         <p><a href="https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js" target="_blank" rel="noopener noreferrer">Instalační odkaz Fyzion+</a></p>
       </details><p id="plus-message" class="muted" aria-live="polite"></p><details id="search-therapists-settings"><summary>Terapeuti dostupní pro hledání</summary><p class="muted">Odškrtnuté terapeuty skryji z nabídky i z volby Všichni. Nastavení se ukládá v tomto prohlížeči.</p>
-        <div id="settings-list"></div><button id="settings-reset" type="button">Obnovit všechny terapeuty</button><p id="settings-message" class="muted" aria-live="polite"></p></details></div>
+        <div id="settings-list"></div><button id="settings-reset" type="button">Obnovit všechny terapeuty</button><p id="settings-message" class="muted" aria-live="polite"></p></details>
+      <p id="plus-guide"><a href="https://github.com/bruhaedwin/Fyzion_upravy/blob/main/README.md" target="_blank" rel="noopener noreferrer">Návod</a></p></div>
       <p id="status"></p><label for="therapist">Terapeut pro hledání</label><select id="therapist"></select><p class="muted">Pro výběr více terapeutů zvolte Všichni a zaškrtněte požadované terapeuty níže. Výběr funguje i na kartě klienta.</p>
       <div id="therapist-selection" hidden><p class="muted">Zrušte zaškrtnutí terapeutů, které chcete z hledání vynechat.</p>
         <div id="selection-actions"><button id="select-all" type="button">Vybrat všechny</button><button id="select-none" type="button">Zrušit výběr</button></div>
@@ -1088,7 +1115,8 @@
         <div><label for="patient-from">Nejdříve od</label><input id="patient-from" type="time"></div><div><label for="patient-to">Nejpozději do</label><input id="patient-to" type="time"></div></div>
         <p class="muted">Prázdný čas neomezuje daný okraj dne. Celá návštěva se musí vejít do zvolených hodin v Praze. Platí pro termíny, série i alternativy. Po obnovení stránky se možnosti pacienta vymažou.</p></details>
       <div class="plus-switches"><label><input id="first-within40" type="checkbox">První návštěva do 40 dní</label></div>
-      <p class="muted">První návštěva nejpozději 40 kalendářních dní ode dneška. Další termíny série mohou být později, v nastaveném rozsahu hledání.</p><p id="search-range-note" class="muted"></p>
+      <label for="voucher-issued">Vystavení FT poukazu</label><input id="voucher-issued" type="date" aria-describedby="voucher-note">
+      <p id="voucher-note" class="muted">Při zapnutém limitu vyberte datum vystavení FT poukazu. První návštěva nejpozději 40 kalendářních dní od tohoto data, včetně posledního dne. Další termíny série mohou být později, v nastaveném rozsahu hledání.</p><p id="search-range-note" class="muted"></p>
       <div id="series-fields" hidden><label for="series-count">Počet termínů</label><input id="series-count" type="number" min="1" max="30" step="1" value="5">
         <label><input id="series-single" type="checkbox" checked>Pouze u jednoho terapeuta</label>
         <p class="muted">Nejbližší dostupné termíny, mezi návštěvami alespoň jeden celý volný den.</p><p class="muted">Bez automatické rezervace. Pro kombinování terapeutů vyberte v poli Terapeut možnost Všichni. Hodina návštěv se může lišit.</p></div>
@@ -1210,12 +1238,12 @@
         const events=availabilityOnly(arrayOf(await readApi(url.href,auth,controller.signal)));
         if(sequence!==previewSequence||!overlay.isConnected)return;
         if(changes!==state.changes||Date.now()-loaded>=MAX_AGE)throw Error('Data se během načítání změnila. Otevřete náhled znovu.');
-        const model=previewModel(slot,resource,events);
+        const model=previewModel(slot,resource,events,Date.now(),preferences.includeOvertime);
         note.textContent=date+' · '+parts(slot.start).time.slice(0,5)+'–'+parts(slot.end).time.slice(0,5)+' · '+(model.free?'Termín je podle aktuálních dat volný.':'Termín již není dostupný nebo je mimo pracovní rozvrh.');
         note.style.color=model.free?'#14734f':'#ae3030';
         const hours=document.createElement('p');hours.style.cssText='padding:10px 12px;border:2px solid #176b50;border-radius:6px;background:#edf8f1;color:#124d3a;font-weight:700';
         const hourText=ms=>ms===model.to?'24:00':parts(ms).time.slice(0,5);
-        hours.textContent='Pracovní doba · '+slot.title+': '+(model.working.length?model.working.map(period=>hourText(period.start)+'–'+hourText(period.end)).join(' a '):'V tento den nemá pravidelnou pracovní dobu.');content.append(hours);
+        hours.textContent='Pracovní doba · '+slot.title+': '+(model.working.length?model.working.map(period=>hourText(period.start)+'–'+hourText(period.end)).join(' a '):'V tento den nemá pracovní dobu.');content.append(hours);
         const legend=document.createElement('p');legend.style.cssText='font-size:12px;color:#475569';legend.textContent='Zelené pozadí: pravidelná pracovní doba. Šedé pozadí: mimo pracovní dobu. Rozvrh nezahrnuje nepravidelné změny; obsazenost je zobrazena samostatně.';content.append(legend);
         const scroller=document.createElement('div');scroller.style.cssText='height:360px;overflow:auto;border:1px solid #cbdadc;border-radius:8px;margin:12px 0';
         const timeline=document.createElement('div');const total=(model.to-model.from)/MIN;timeline.style.cssText='position:relative;background:#e5e7eb;margin-left:52px;height:'+total+'px';scroller.append(timeline);content.append(scroller);
@@ -1291,7 +1319,7 @@
       if(css!==lastAppearance){appearance.textContent=css;lastAppearance=css;}
     }
     function syncPreferenceControls(){
-      for(const key of ['seriesModule','therapistsModule','bookingModule','hideNativeVisitButton','showPreparationMessages','contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) el('plus-'+key).checked=preferences[key];
+      for(const key of ['includeOvertime','seriesModule','therapistsModule','bookingModule','hideNativeVisitButton','showPreparationMessages','contrast','hidePopup','timeLabels','hideVisitStatus','hatch']) el('plus-'+key).checked=preferences[key];
       for(const key of ['offColor','hatchColor','duration','days']) el(key==='days'?'days':'plus-'+key).value=String(preferences[key]);
       el('first-within40').checked=preferences.firstWithin40;
       el('series-count').value=String(preferences.seriesCount);el('series-single').checked=preferences.seriesSingle;
@@ -1307,14 +1335,14 @@
     syncPreferenceControls();
     el('duration').value=String(preferences.duration);el('days').value=String(preferences.days);
     applyAppearance();
-    for(const key of ['seriesModule','therapistsModule','bookingModule','hideNativeVisitButton','showPreparationMessages','contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days']){
+    for(const key of ['includeOvertime','seriesModule','therapistsModule','bookingModule','hideNativeVisitButton','showPreparationMessages','contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days']){
       el(key==='days'?'days':'plus-'+key).onchange=()=>{
         try{
           let value=el(key==='days'?'days':'plus-'+key).value;
           if(typeof PLUS_DEFAULTS[key]==='boolean')value=el('plus-'+key).checked;
           if(key==='duration'||key==='days')value=Number(value);
           preferences=validatePreferences({...preferences,[key]:value});
-          if(key==='seriesModule'){clear();resultLoaded=null;render();}
+          if(key==='seriesModule'||key==='includeOvertime'){clear();resultLoaded=null;render();}
           if(key==='bookingModule'||key==='hideNativeVisitButton'){syncPatientTile();render();}
           if(key==='showPreparationMessages')render();
           if(key==='duration'||key==='days'){el(key).value=String(value);clear();resultLoaded=null;}
@@ -1380,16 +1408,18 @@
       applyAppearance();
       for(const id of ['therapists-now','therapists-all','therapists-none'])el(id).disabled=searching||navigating;
       el('plus-import').disabled=searching||navigating;
-      for(const k of ['seriesModule','therapistsModule','bookingModule','hideNativeVisitButton','showPreparationMessages','contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days'])el(k==='days'?'days':'plus-'+k).disabled=searching||navigating;
+      for(const k of ['includeOvertime','seriesModule','therapistsModule','bookingModule','hideNativeVisitButton','showPreparationMessages','contrast','hidePopup','timeLabels','hideVisitStatus','hatch','offColor','hatchColor','duration','days'])el(k==='days'?'days':'plus-'+k).disabled=searching||navigating;
       el('first-within40').disabled=searching||navigating;
+      el('voucher-issued').disabled=searching||navigating;
       el('search-range-note').textContent=`Rozsah hledání: ${preferences.days} kalendářních dní. Změníte přes + → Výchozí hledání.`;
+      el('work-scope-note').textContent=(preferences.includeOvertime?'Týdenní rozvrh včetně nepravidelné pracovní doby (přesčasů).':'Pouze pravidelný týdenní rozvrh; přesčasy jsou vypnuté.')+' Praha. Začátky po 15 minutách. Nic se automaticky nerezervuje.';
       host.classList.toggle('booking-disabled',!preferences.bookingModule);
       host.classList.toggle('no-booking-context',!patientCardKey(location.pathname));
       el('toggle').hidden=!/^\/calendar(?:\/|$)/.test(location.pathname);
       el('tile-row').hidden=el('toggle').hidden;
       const preparationStatus=document.getElementById('fyzion-plus-preparation-status');
-      if(preparationStatus&&!preferences.showPreparationMessages)preparationStatus.remove();
-      if(!preferences.showPreparationMessages&&el('navigation').dataset.preparation==='true')el('navigation').textContent='';
+      if(preparationStatus&&!preferences.showPreparationMessages&&preparationStatus.dataset.outcome!=='true')preparationStatus.remove();
+      if(!preferences.showPreparationMessages&&el('navigation').dataset.preparation==='true'&&el('navigation').dataset.outcome!=='true')el('navigation').textContent='';
       el('series-fields').hidden=!preferences.seriesModule;
       el('series-count').disabled=searching||navigating;el('series-single').disabled=searching||navigating;
       el('search').textContent='Najít termíny';
@@ -1489,9 +1519,11 @@
 
     const cardContext=document.createElement('p');cardContext.style.cssText='padding:10px;background:#edf8f6;border-radius:7px;font-size:12px';cardContext.hidden=true;
     el('heading').after(cardContext);
-    let activeCardPath=null, bookingPatientId=null;
+    let activeCardPath=null, bookingPatientId=null, voucherPatientId=null;
     tileRoot.querySelector('button').onclick=()=>{
       const key=patientCardKey(location.pathname);if(!key)return;
+      if(voucherPatientId!==key){el('voucher-issued').value='';clear();resultLoaded=null;}
+      voucherPatientId=key;
       activeCardPath=location.pathname;bookingPatientId=key;
       cardContext.textContent='Otevřeno z karty klienta č. '+key+'. Vyberte termín a klikněte na Připravit návštěvu. Fyzion+ otevře + Návštěva, počká na klienta a doplní údaje termínu.';
       cardContext.hidden=false;el('panel').hidden=false;keepInside(el('widget'));render();
@@ -1538,6 +1570,7 @@
       syncNativeVisitSearch();syncNativeVisitButton();
       if(!preferences.bookingModule){detachCardTile();bookingPatientId=null;activeCardPath=null;cardContext.hidden=true;cardContext.textContent='';return;}
       const key=patientCardKey(location.pathname);
+      if(key&&voucherPatientId&&key!==voucherPatientId){el('voucher-issued').value='';voucherPatientId=null;clear();resultLoaded=null;}
       if(key&&bookingPatientId&&key!==bookingPatientId){bookingPatientId=null;activeCardPath=null;cardContext.hidden=true;cardContext.textContent='';}
       if(!key){detachCardTile();return;}
       const buttons=[...document.querySelectorAll('button,a')].filter(button=>(visitVisible(button)||button.hasAttribute('data-fyzion-plus-hidden-new-visit'))&&
@@ -1591,6 +1624,7 @@
       preferences=validatePreferences({...preferences,firstWithin40:el('first-within40').checked});
       clear();resultLoaded=null;persistPreferences();
     };
+    el('voucher-issued').oninput=()=>{clear();resultLoaded=null;};
     el('series-count').oninput=()=>{clear();resultLoaded=null;};
     el('series-count').onchange=()=>{
       try{preferences=validatePreferences({...preferences,seriesCount:Number(el('series-count').value)});persistPreferences();}
@@ -1683,10 +1717,11 @@
       };
       const selected = el('therapist').value, date = el('from').value, days = Number(el('days').value), duration = Number(el('duration').value);
       const seriesEnabled=preferences.seriesModule,seriesCount=Number(el('series-count').value),seriesSingle=el('series-single').checked;
-      const firstBefore=el('first-within40').checked?localMs(addDays(parts(Date.now()).date,41),'00:00:00'):Infinity;
+      let firstBefore;
       const transport = { headers: new Headers(state.transport.headers), credentials: state.transport.credentials };
       let patientPreferences;
       try {
+        firstBefore=voucherFirstBefore(el('first-within40').checked,el('voucher-issued').value);
         patientPreferences=readPatientPreferences();
         rangeChunks(date, days);
         if (![15, 30, 45, 60].includes(duration)) throw Error('Vyberte délku 15, 30, 45 minut nebo 1 hodinu.');
@@ -1710,7 +1745,7 @@
         });
         check();
         if (Date.now() - batch.loaded >= MAX_AGE) throw Error('Načítání trvalo příliš dlouho. Zkuste hledání znovu.');
-        const result = findAllSlots({ resources: matches, events: batch.events, from: batch.from, to: batch.to, duration, patientPreferences, limit: seriesEnabled?Math.max(20000,20000*matches.length):10000 });
+        const result = findAllSlots({ resources: matches, events: batch.events, from: batch.from, to: batch.to, duration, patientPreferences, includeOvertime:preferences.includeOvertime, limit: seriesEnabled?Math.max(20000,20000*matches.length):10000 });
         if(!seriesEnabled)result.slots=result.slots.filter(slot=>slot.start<firstBefore);
         resultLoaded = batch.loaded;
         const dateFmt = new Intl.DateTimeFormat('cs-CZ', { timeZone: ZONE, weekday: 'short', day: 'numeric', month: 'numeric' });
@@ -1737,7 +1772,7 @@
               const url=new URL('https://api.fyzion.cz/v1/calendar-users/events/');url.searchParams.set('start',new Date(chunk.from).toISOString());url.searchParams.set('end',new Date(chunk.to).toISOString());
               for(const r of eligible)url.searchParams.append('user_ids',r.id);
               const events=availabilityOnly(arrayOf(await readApi(url,auth,abort.signal)));checkAlternative();
-              const free=findAllSlots({resources:eligible,events,from:chunk.from,to:chunk.to,duration,patientPreferences,limit:Math.max(10000,10000*eligible.length)});
+              const free=findAllSlots({resources:eligible,events,from:chunk.from,to:chunk.to,duration,patientPreferences,includeOvertime:preferences.includeOvertime,limit:Math.max(10000,10000*eligible.length)});
               if(free.more)throw Error('Alternativ je příliš mnoho; úplnost výpočtu nelze potvrdit.');
               for(const candidate of free.slots){
                 const key=`${candidate.resourceId}:${candidate.start}:${candidate.end}`;
@@ -1780,10 +1815,11 @@
             status.style.cssText='position:fixed;top:12px;right:12px;z-index:2147483647;max-width:min(460px,calc(100vw - 24px));padding:14px;background:#fff;border:2px solid #176b50;border-radius:8px;box-shadow:0 4px 24px #0004;color:#203743;font:14px/1.5 Arial,sans-serif';
             const message=document.createElement('p');message.style.margin='0 0 8px';
             const dismiss=document.createElement('button');dismiss.type='button';dismiss.textContent='Zrušit přípravu';dismiss.onclick=()=>preparationController?.abort();status.append(message,dismiss);if(preferences.showPreparationMessages)document.documentElement.append(status);
-            const report=text=>{el('navigation').dataset.preparation='true';el('navigation').textContent=preferences.showPreparationMessages?text:'';message.textContent='Fyzion+ · '+text;if(!preferences.showPreparationMessages)status.remove();};
+            el('navigation').dataset.outcome='false';
+            const report=(text,outcome=false)=>{el('navigation').dataset.preparation='true';el('navigation').dataset.outcome=String(outcome);status.dataset.outcome=String(outcome);const visible=preferences.showPreparationMessages||outcome;el('navigation').textContent=visible?text:'';message.textContent='Fyzion+ · '+text;status.hidden=!visible;if(visible&&!status.isConnected)document.documentElement.append(status);if(!visible)status.remove();};
             report('Připravuji návštěvu…');
-            try{report(await prepareVisit(slot,patientForResult,report,preparationController.signal));}
-            catch(e){status.style.borderColor='#ae3030';report('Příprava návštěvy: '+e.message);}
+            try{report(await prepareVisit(slot,patientForResult,report,preparationController.signal,preferences.includeOvertime),true);}
+            catch(e){status.style.borderColor='#ae3030';report('Příprava návštěvy: '+e.message,true);}
             finally{dismiss.textContent='Zavřít hlášení';dismiss.onclick=()=>status.remove();clearTimeout(preparationTimer);preparationController=null;prepare.disabled=false;prepare.textContent='Připravit návštěvu';navigating=false;render();}};actions.append(prepare);
           const preview=document.createElement('button');preview.type='button';preview.className='alternative-btn';preview.textContent='Náhled';preview.onclick=()=>{if(!navigating&&!searching)openSlotPreview(slot,preview);};actions.append(preview);
           const alternative=document.createElement('button');alternative.type='button';alternative.className='alternative-btn';alternative.textContent='Najít alternativu';
@@ -1877,7 +1913,7 @@
                       const url=new URL('https://api.fyzion.cz/v1/calendar-users/events/');url.searchParams.set('start',new Date(chunk.from).toISOString());url.searchParams.set('end',new Date(chunk.to).toISOString());for(const id of ids)url.searchParams.append('user_ids',id);
                       return readApi(url,auth,abort.signal);
                     }});checkAdd();
-                    const free=findAllSlots({resources:eligible,events:fresh.events,from:fresh.from,to:fresh.to,duration,patientPreferences,limit:Math.max(20000,20000*eligible.length)});
+                    const free=findAllSlots({resources:eligible,events:fresh.events,from:fresh.from,to:fresh.to,duration,patientPreferences,includeOvertime:preferences.includeOvertime,limit:Math.max(20000,20000*eligible.length)});
                     if(free.more)throw Error('Možností je příliš mnoho. Zkraťte rozsah hledání.');
                     const found=seriesAdditions(free.slots,plan,seriesCount,firstBefore).slice(0,12);
                     options.replaceChildren();
@@ -1932,7 +1968,7 @@
         }
         const dateFmtFull = new Intl.DateTimeFormat('cs-CZ', { timeZone: ZONE, dateStyle: 'short' });
         const rangeText = `${dateFmtFull.format(batch.from)}–${dateFmtFull.format(localMs(addDays(date, days - 1), '12:00:00'))}`;
-        el('message').textContent = `${rangeText} · ${days} dní ověřeno. ${firstBefore===Infinity?'':'První návštěva do 40 dní ode dneška. '}` + (seriesEnabled?
+        el('message').textContent = `${rangeText} · ${days} dní ověřeno. ${firstBefore===Infinity?'':`První návštěva do 40 dní od vystavení FT poukazu (${el('voucher-issued').value}). `}` + (seriesEnabled?
           (seriesResult.plans.length?`Nalezeno ${seriesResult.plans.length} návrhů kompletní série po ${seriesCount} termínech. Mezi návštěvami alespoň jeden celý volný den. Kliknutí pouze otevře kalendář.`:
             `Kompletní série nenalezena. Zobrazuji ${seriesResult.partialPlans.length} neúplných variant; nejlepší má ${seriesResult.availableCount}/${seriesCount} termínů${seriesSingle?' u jednoho terapeuta':''}. Mezi návštěvami alespoň jeden celý volný den. Zvětšete rozsah nebo upravte zadání.`):
           (result.slots.length ?
