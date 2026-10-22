@@ -76,7 +76,7 @@
         <article id="readme-content" class="readme-markdown">
 <h1>Fyzion+</h1>
 <p>Neoficiální desktopový pomocník pro <a href="https://app.fyzion.cz/">Fyzion</a>. Přidává hledání volných termínů, plánování sérií, přípravu návštěvy z karty klienta a volitelné úpravy vzhledu.</p>
-<p><strong>Verze 1.7.49</strong> · Uživatelský skript pro Tampermonkey · České rozhraní · Kandidát na desktop stable</p>
+<p><strong>Verze 1.8.0 stable</strong> · Uživatelský skript pro Tampermonkey · České rozhraní · Desktop stable</p>
 <blockquote>
 <p>Skript návštěvy automaticky neukládá. Výsledky hledání nejsou rezervace. Před uložením vždy zkontrolujte klienta, službu, terapeuta, místnost, délku a datum s časem.</p>
 </blockquote>
@@ -107,6 +107,14 @@
 <td>Hledání pro vybrané terapeuty, délky 15/30/45/60 minut a období 1–180 dní.</td>
 </tr>
 <tr>
+<td>První návštěva do 40 dní</td>
+<td>Lhůta od zadaného data vystavení FT poukazu, včetně 40. dne.</td>
+</tr>
+<tr>
+<td>Nepravidelná pracovní doba</td>
+<td>Volitelné zahrnutí přesčasů, také ve dnech bez pravidelné směny.</td>
+</tr>
+<tr>
 <td>Dostupnost klienta</td>
 <td>Omezení podle dnů týdne a času od/do.</td>
 </tr>
@@ -120,7 +128,7 @@
 </tr>
 <tr>
 <td>Kontrolní náhled</td>
-<td>Obsazenost terapeuta, navržený termín a výrazný začátek a konec pravidelné pracovní doby, včetně dělených směn.</td>
+<td>Obsazenost terapeuta, navržený termín a začátek a konec pracovní doby, včetně dělených směn a volitelných přesčasů.</td>
 </tr>
 <tr>
 <td>Najít termín na kartě klienta</td>
@@ -150,6 +158,13 @@
 </ol>
 <p>Kliknutí na datum a čas otevře kalendář. Tlačítko Náhled načte aktuální obsazenost a pracovní rozvrh. Alternativy mohou změnit jednotlivé termíny návrhu.</p>
 <p>Návrh série nic neukládá. Hromadné ukládání celé série není součástí této verze. Výsledky starší než dvě minuty jsou označené; před použitím starších výsledků spusťte nové hledání. Vyhodnocování času používá pásmo Europe/Prague.</p>
+<h3>První návštěva do 40 dní</h3>
+<p>Zapněte <strong>První návštěva do 40 dní</strong> a vyplňte <strong>Vystavení FT poukazu</strong>. Lhůta vychází výhradně z tohoto data, nikoli z dneška ani z data „Hledat od“. Poslední povolený den první návštěvy je datum vystavení + 40 kalendářních dní včetně. Například poukaz vystavený 1. 10. 2026 umožní první návštěvu nejpozději 10. 11. 2026. Rozsah hledání se tím automaticky nemění.</p>
+<p>V sérii se limit týká první návštěvy; další mohou následovat později v rozsahu hledání. Prázdné nebo neplatné datum při zapnutém limitu hledání zastaví a zobrazí vysvětlení. Při vypnutém limitu se datum nepoužívá. Změna data vymaže výsledky, proto spusťte nové hledání.</p>
+<p>Datum poukazu se nepředvyplňuje dneškem a neukládá se do nastavení ani exportu. Při otevření hledání pro jiného klienta se vymaže.</p>
+<h3>Nepravidelná pracovní doba (přesčas)</h3>
+<p>V <strong>+ → Moduly → Zahrnout nepravidelnou pracovní dobu (přesčas)</strong> je ve výchozím stavu zapnutá podpora nepravidelných ordinačních hodin Fyzionu. Ty rozšiřují běžný rozvrh i na dny bez pravidelné směny. Překrývající se pracovní úseky se sloučí. Návštěvy, volno, přestávky a ostatní blokace se nadále odečítají.</p>
+<p>Vypnutí přepínače omezí hledání, série, alternativy, náhled a závěrečné ověření před přípravou návštěvy na pravidelný rozvrh. Změna vymaže dosavadní výsledky. Volba se ukládá a přenáší exportem/importem nastavení.</p>
 <h2>Příprava návštěvy z karty klienta</h2>
 <ol>
 <li>Otevřete kartu požadovaného klienta a klikněte na <strong>Najít termín</strong>.</li>
@@ -186,16 +201,15 @@
 <p>Klienta předvyplňuje Fyzion, skript jej nepřepisuje. Existující formulář využije jen tehdy, pokud z něj dokáže ověřit odpovídající ID klienta. Jinak jej zavřete a spusťte přípravu znovu z karty. Změna klienta, stránky, formuláře nebo ruční interakce během přípravy operaci přeruší.</p>
 <p>Celkový limit přípravy je 60 sekund. Hledání má limit 90 sekund a načtení náhledu 30 sekund. Po chybě či zrušení mohou ve formuláři zůstat částečně doplněné údaje.</p>
 <h3>Hlášky přípravy</h3>
-<p>V <strong>+ → Moduly → Zobrazovat hlášky přípravy návštěvy</strong> lze vypnout průběžné i výsledné hlášky. Volba se ukládá.</p>
-<p><strong>Vypnutí potlačí také chyby a upozornění na neověřenou službu.</strong> Pro první použití, ověřování nové verze a řešení problémů ponechte hlášky zapnuté. Při jejich vypnutí nelze samotný návrat tlačítka do původního stavu považovat za potvrzení úspěšné přípravy.</p>
+<p>V <strong>+ → Moduly → Zobrazovat hlášky přípravy návštěvy</strong> lze vypnout průběžné zprávy. Volba se ukládá. Konečný výsledek, chyba a upozornění na ruční kontrolu služby zůstávají viditelné i při vypnutých průběžných zprávách. Hlášení zavřete tlačítkem <strong>Zavřít hlášení</strong>.</p>
 <h2>Zobrazit terapeuty</h2>
 <p>Nenápadné tlačítko v kalendáři otevírá nabídku se třemi akcemi. Po zvolení akce se nabídka zavře.</p>
 <ul>
-<li><strong>Právě pracují:</strong> zahrne terapeuty v aktuální pravidelné pracovní době bez právě probíhajícího volna a také terapeuty s právě probíhající návštěvou či jinou běžnou událostí mimo rozvrh. Samotné volno, přestávka a událost zobrazovaná jako pozadí se za práci nepočítají. Probíhající běžná událost má při souběhu přednost před volnem.</li>
+<li><strong>Právě pracují:</strong> zahrne terapeuty v aktuální pravidelné či nepravidelné pracovní době bez právě probíhajícího volna a také terapeuty s právě probíhající návštěvou či jinou běžnou událostí mimo rozvrh. Samotné volno a přestávka se za práci nepočítají; nepravidelné ordinační hodiny jsou pracovní dobou i při zobrazení jako pozadí. Probíhající běžná událost má při souběhu přednost před volnem.</li>
 <li><strong>Zobrazit všechny terapeuty:</strong> zapne všechny terapeuty povolené v nastavení Fyzion+.</li>
 <li><strong>Skrýt všechny terapeuty:</strong> vypne jejich sloupce v kalendáři.</li>
 </ul>
-<p>Právě pracují se posuzuje podle skutečného aktuálního času v Praze, nikoli podle právě prohlíženého dne kalendáře. Akce nahrazují aktuální výběr sloupců. Výběr sloupců je oddělený od terapeutů vybraných pro hledání termínů.</p>
+<p>Právě pracují se posuzuje podle skutečného aktuálního času v Praze, nikoli podle právě prohlíženého dne kalendáře. Akce nahrazují aktuální výběr sloupců. Výběr sloupců je oddělený od terapeutů vybraných pro hledání termínů. Volba Právě pracují vždy zohledňuje skutečné přesčasy, i když jsou ve vyhledávání vypnuté.</p>
 <h2>Nastavení pod tlačítkem +</h2>
 <table>
 <thead>
@@ -206,7 +220,7 @@
 </thead>
 <tbody><tr>
 <td>Moduly</td>
-<td>Objednání z karty klienta, hlášky přípravy, Zobrazit terapeuty a plánování série.</td>
+<td>Objednání z karty klienta, průběžné hlášky přípravy, Zobrazit terapeuty, plánování série a zahrnutí přesčasů.</td>
 </tr>
 <tr>
 <td>Vzhled Fyzionu</td>
@@ -226,6 +240,7 @@
 </tr>
 </tbody></table>
 <p>Skrytí původního tlačítka + Návštěva jej neodstraní z aplikace; příprava návštěvy Fyzion+ jej může dál použít. Pro obnovení ručního přístupu vypněte jeho skrývání v sekci Vzhled Fyzionu.</p>
+<p>Ve spodní části nabídky <strong>+</strong> je odkaz <strong>Návod</strong>, který otevře toto README v nové kartě.</p>
 <h3>Uložená data</h3>
 <p>V místním úložišti webu se uchovává nastavení, poloha panelu, povolení/skrytí terapeutů, výběr pro hledání a pomocný seznam ID a jmen terapeutů až na sedm dní. Dostupnost klienta se po obnovení stránky vymaže. Obsazenost se pro hledání načítá znovu.</p>
 <p>Export obsahuje společné nastavení a ID trvale skrytých terapeutů. Neobsahuje data pacientů, celý aktuální výběr terapeutů ani pomocný seznam jejich jmen. Import nahrazuje odpovídající místní nastavení. Vymazání dat webu může uložené volby odstranit.</p>
@@ -236,7 +251,7 @@
 <li>Přihlašovací hlavičky drží v paměti stránky; neukládá je do exportu ani nastavení.</li>
 <li>Uchovávaná dostupnost a vlastní náhled neobsahují jména pacientů ani poznámky. Pomocný seznam terapeutů jejich jména obsahuje.</li>
 <li>Skript neobsahuje vlastní analytiku ani odesílání údajů na jiný externí server.</li>
-<li>Hledání a náhled neověřují dostupnost místnosti ani kolize klienta u jiných terapeutů. Vycházejí z pravidelného týdenního rozvrhu a načtených událostí; nepravidelnou pracovní dobu samostatně nevyhodnocují.</li>
+<li>Hledání a náhled neověřují dostupnost místnosti ani kolize klienta u jiných terapeutů. Vycházejí z pravidelného týdenního rozvrhu, volitelných nepravidelných ordinačních hodin (ExtraOfficeHours) a načtených blokací.</li>
 <li>Ověření dostupnosti není rezervace. Jiný uživatel může mezitím termín obsadit.</li>
 <li>Nepodporované rozvrhy, nejednoznačné časy při změně letního času nebo neúplná/stránkovaná data mohou hledání zastavit.</li>
 <li>Změna rozhraní nebo API Fyzionu může vyžadovat úpravu skriptu.</li>
@@ -271,6 +286,14 @@
 <td>Zavřete jej a spusťte přípravu z karty; ID klienta nemusí být ve stávajícím formuláři ověřitelné.</td>
 </tr>
 <tr>
+<td>Přesčas se nenabízí</td>
+<td>Zapněte zahrnutí přesčasů v + → Moduly. Zkontrolujte terapeuta, dostupnost klienta, datum od, rozsah a případnou 40denní lhůtu.</td>
+</tr>
+<tr>
+<td>Hledání vyžaduje datum poukazu</td>
+<td>Vyplňte Vystavení FT poukazu, nebo vypněte První návštěva do 40 dní.</td>
+</tr>
+<tr>
 <td>Výsledky jsou staré</td>
 <td>Spusťte nové hledání.</td>
 </tr>
@@ -280,28 +303,30 @@
 </tr>
 </tbody></table>
 <p>Při hlášení chyby uveďte verzi, postup a přesnou hlášku. Snímky anonymizujte; neposílejte přihlašovací údaje, hlavičky požadavků ani údaje pacientů.</p>
-<h2>Stav vydání a ověření</h2>
-<p>Verze 1.7.49 navazuje na uživatelské ověření běžného postupu hledání a přípravy návštěvy. Proběhly kontroly syntaxe a izolované simulace výpočtů dostupnosti, služeb, kontrol klienta, nastavení a vybraných chybových situací. Nejde o kompletní automatizované ověření živého přihlášeného Fyzionu.</p>
-<p>Před označením za stable doporučujeme:</p>
-<ol>
-<li>Zachovat rozpoznatelný výsledek přípravy i při vypnutých hláškách, například stavem tlačítka při chybě nebo nutné ruční kontrole služby.</li>
-<li>V živém Fyzionu ověřit přípravu 15/30/45 minut, ruční službu 60 minut, chybějící službu, obsazený termín, přerušení, změnu klienta, skryté původní tlačítko a import/export nastavení. Kontrolovat i údaje skutečně uloženého testovacího záznamu.</li>
-<li>Zaznamenat ověřený prohlížeč a verzi Tampermonkey a vydat shodný skript, README a archiv pod jedním označením.</li>
-</ol>
-<h3>Změny od 1.7.30</h3>
+<h2>Verze 1.8.0 stable a ověření</h2>
+<p>Vydáno 22. 10. 2026. Stabilní desktopové vydání navazuje na uživatelské ověření běžného hledání a přípravy návštěvy a na potvrzený nález termínu v přesčase v živém Fyzionu.</p>
+<p>Před vydáním prošly:</p>
 <ul>
-<li>Opakované ověření dostupnosti před přípravou a po ní, kontrola klienta a formuláře, limit přípravy a možnost přerušení.</li>
-<li>Opravy přechodu z karty do nové návštěvy a bezpečnější zavírání nabídek ve formuláři.</li>
-<li>Zvýraznění začátku a konce pracovní doby v náhledu.</li>
-<li>Volitelné hlášky přípravy a jednotný text tlačítka Najít termíny.</li>
-<li>Kontextové zobrazení dlaždic a tlačítek, upravený vzhled Najít termín a Zobrazit terapeuty.</li>
-<li>Sbalitelný seznam terapeutů v nastavení.</li>
-<li>Zahrnutí právě probíhajících běžných událostí mimo rozvrh do volby Právě pracují.</li>
-<li>Kompaktní nabídka terapeutů se zavřením po výběru.</li>
-<li>Volitelné skrytí původního tlačítka + Návštěva v sekci Vzhled Fyzionu.</li>
+<li>kontrola syntaxe a 160 porovnání výpočtu dostupnosti s nezávislým výpočtem na generovaných datech;</li>
+<li>délky 15/30/45/60 minut, dělené směny, přesčasy, kolize a omezení dostupnosti klienta;</li>
+<li>datum poukazu, prázdné/neplatné datum, hranice 40. dne, přestupný rok a změny času;</li>
+<li>série, doplnění chybějícího termínu, alternativy, pravidla služeb a odmítnutí neúplných odpovědí;</li>
+<li>integrační kontrola rozhraní v Chrome na simulovaných datech: hledání, přepínač přesčasů, uchování nastavení, série, chyba API, odkaz Návod, změna klienta a viditelnost výsledné chyby při vypnutých průběžných zprávách;</li>
+<li>kontrola instalačního webu, aktuálního README a záložní dokumentace bez JavaScriptu.</li>
+</ul>
+<p>Označení stable neznamená ověření všech kombinací prohlížečů, pracovišť a služeb. Celý postup skutečného uložení návštěvy nebyl při této závěrečné kontrole automatizován v živém přihlášeném Fyzionu. Dostupnost místností a souběh návštěv klienta u jiných terapeutů nejsou ověřovány.</p>
+<h3>Hlavní změny</h3>
+<ul>
+<li>Datum vystavení FT poukazu jako jediný základ 40denní lhůty.</li>
+<li>Přesčasy v hledání, sériích, alternativách, náhledu a ověření návštěvy; možnost je vypnout v modulech.</li>
+<li>Odkaz Návod přímo z nabídky +.</li>
+<li>Viditelný konečný výsledek přípravy i při vypnutých průběžných hláškách.</li>
+<li>Vymazání data poukazu a výsledků při změně klienta.</li>
+<li>Popis v panelu odpovídá zapnutí či vypnutí přesčasů.</li>
+<li>Sjednocené číslo verze, README a záložní dokumentace na instalačním webu.</li>
 </ul>
 
-        </article>
+</article>
       </section>
           <div class="help" aria-labelledby="help-title"><h2 id="help-title">Když potřebujete poradit</h2>
             <details><summary>Po kliknutí vidím pouze text kódu</summary><p>Zkontrolujte, že je Tampermonkey nainstalovaný a zapnutý v tomto prohlížeči. Potom znovu otevřete instalační odkaz Fyzion+. Pokud Tampermonkey požaduje povolení uživatelských skriptů, postupujte podle jeho pokynů v nastavení rozšíření.</p><p><a href="https://www.tampermonkey.net/faq.php?ext=dhdg&q=Q209" target="_blank" rel="noopener noreferrer">Oficiální návod k povolení skriptů ↗</a></p></details>
