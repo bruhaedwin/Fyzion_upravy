@@ -240,6 +240,6 @@ Aktualizace bety 2.0.0-beta.4.
 - Přepínač této vlastnosti se v Modulech → Terapeuti jmenuje Zjemnit tlačítko Zobrazit terapeuty mimo najetí myší. Původní nastavení zůstává zachované.
 - Výrazné zrychlení fungování skriptu
 
-V Tampermonkey aktualizujte existující Fyzion+ souborem fyzion-helper-2.0.0-beta.5.user.js. Ponechte jednu aktivní kopii a obnovte otevřené stránky Fyzionu.
+V Tampermonkey aktualizujte existující Fyzion+ souborem fyzion-plus-beta-parallel.user.js. Ponechte jednu aktivní kopii a obnovte otevřené stránky Fyzionu.
 
 Jde stále o rozpracovanou verzi 2.0; plánované komplexní kontroly kolizí klienta/místnosti a přehled uložených návštěv série zatím nejsou dokončené.
