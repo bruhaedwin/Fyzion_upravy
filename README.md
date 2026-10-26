@@ -2,7 +2,7 @@
 
 Neoficiální desktopový pomocník pro [Fyzion](https://app.fyzion.cz/). Přidává hledání volných termínů, plánování sérií, přípravu návštěvy z karty klienta a volitelné úpravy vzhledu.
 
-**Verze 1.8.0 stable** · Uživatelský skript pro Tampermonkey · České rozhraní · Desktop stable
+**Verze 1.8.8 stable** · Uživatelský skript pro Tampermonkey · České rozhraní · Desktop stable
 
 > Skript návštěvy automaticky neukládá. Výsledky hledání nejsou rezervace. Před uložením vždy zkontrolujte klienta, službu, terapeuta, místnost, délku a datum s časem.
 
@@ -56,6 +56,20 @@ Kliknutí na datum a čas otevře kalendář. Tlačítko Náhled načte aktuáln
 
 Návrh série nic neukládá. Hromadné ukládání celé série není součástí této verze. Výsledky starší než dvě minuty jsou označené; před použitím starších výsledků spusťte nové hledání. Vyhodnocování času používá pásmo Europe/Prague.
 
+### Přidání termínu do série
+
+Tlačítko **Přidat termín** nabízí návštěvy pouze po posledním datu aktuálního návrhu série. Nevyplňuje mezery mezi zbývajícími návštěvami. Zachovává dostupnost klienta, výběr terapeuta, nastavení přesčasů a alespoň jeden celý volný den mezi návštěvami. Po přidání se návštěvy seřadí podle data a přečíslují.
+
+Doplnění používá původní rozsah hledání. Pokud za poslední návštěvou není vhodný termín, zvětšete rozsah a spusťte nové hledání. U prázdného návrhu platí pro první přidávaný termín i případný limit od vystavení FT poukazu.
+
+### Obnovení zadání po refreshi
+
+Tlačítko **Obnovit poslední nastavená data** načte poslední platné zadání ve Volných termínech: terapeuta a výběr osob, délku, datum Hledat od, rozsah, dostupnost klienta, datum vystavení poukazu a přepínač 40 dní, počet a režim série a zahrnutí přesčasů. Zadání se průběžně uchovává při změnách polí. Rozepsané neplatné hodnoty nepřepíšou poslední platné zadání.
+
+Zadání zůstává dostupné po refreshi v téže kartě prohlížeče. Uchovává se v dočasném úložišti karty (sessionStorage), odděleně pro kalendář a jednotlivé klienty, bez jmen klientů. Není součástí exportu. Po zavření karty nemusí být dostupné. Pokud úložiště prohlížeč nepovolí nebo nebylo zadání dosud nastaveno, obnova nemusí být dostupná.
+
+Tlačítko obnoví pouze pole formuláře; nemění datum zobrazeného kalendáře ani neobnovuje staré výsledky. Potom klikněte na **Najít termíny** pro aktuální dostupnost. Nedostupného nebo zakázaného terapeuta nelze automaticky obnovit.
+
 ### První návštěva do 40 dní
 
 Zapněte **První návštěva do 40 dní** a vyplňte **Vystavení FT poukazu**. Lhůta vychází výhradně z tohoto data, nikoli z dneška ani z data „Hledat od“. Poslední povolený den první návštěvy je datum vystavení + 40 kalendářních dní včetně. Například poukaz vystavený 1. 10. 2026 umožní první návštěvu nejpozději 10. 11. 2026. Rozsah hledání se tím automaticky nemění.
@@ -98,9 +112,10 @@ V **+ → Moduly → Zobrazovat hlášky přípravy návštěvy** lze vypnout pr
 
 ## Zobrazit terapeuty
 
-Nenápadné tlačítko v kalendáři otevírá nabídku se třemi akcemi. Po zvolení akce se nabídka zavře.
+Nenápadné tlačítko v kalendáři otevírá nabídku se čtyřmi akcemi. Po zvolení akce se nabídka zavře.
 
 - **Právě pracují:** zahrne terapeuty v aktuální pravidelné či nepravidelné pracovní době bez právě probíhajícího volna a také terapeuty s právě probíhající návštěvou či jinou běžnou událostí mimo rozvrh. Samotné volno a přestávka se za práci nepočítají; nepravidelné ordinační hodiny jsou pracovní dobou i při zobrazení jako pozadí. Probíhající běžná událost má při souběhu přednost před volnem.
+- **Dnes pracují:** přepne kalendář na dnešní datum a vybere povolené terapeuty, kteří mají během dneška jakoukoli událost — minulou, probíhající nebo budoucí. Zahrnuje i události přesahující půlnoc, přesčasy a volno. Samotný pravidelný rozvrh bez událostí nestačí. Pokud dnes nemá nikdo události, sloupce se skryjí. Den se posuzuje v časovém pásmu Europe/Prague.
 - **Zobrazit všechny terapeuty:** zapne všechny terapeuty povolené v nastavení Fyzion+.
 - **Skrýt všechny terapeuty:** vypne jejich sloupce v kalendáři.
 
@@ -122,7 +137,7 @@ Ve spodní části nabídky **+** je odkaz **Návod**, který otevře toto READM
 
 ### Uložená data
 
-V místním úložišti webu se uchovává nastavení, poloha panelu, povolení/skrytí terapeutů, výběr pro hledání a pomocný seznam ID a jmen terapeutů až na sedm dní. Dostupnost klienta se po obnovení stránky vymaže. Obsazenost se pro hledání načítá znovu.
+V místním úložišti webu se uchovává nastavení, poloha panelu, povolení/skrytí terapeutů, výběr pro hledání a pomocný seznam ID a jmen terapeutů až na sedm dní. Dostupnost klienta se po obnovení stránky automaticky nepředvyplní; poslední zadání lze načíst tlačítkem Obnovit poslední nastavená data v téže kartě. Obsazenost se pro hledání načítá znovu.
 
 Export obsahuje společné nastavení a ID trvale skrytých terapeutů. Neobsahuje data pacientů, celý aktuální výběr terapeutů ani pomocný seznam jejich jmen. Import nahrazuje odpovídající místní nastavení. Vymazání dat webu může uložené volby odstranit.
 
@@ -156,9 +171,9 @@ Nastavení ani pomocný seznam nejsou odděleny podle účtu/pracoviště. Při 
 
 Při hlášení chyby uveďte verzi, postup a přesnou hlášku. Snímky anonymizujte; neposílejte přihlašovací údaje, hlavičky požadavků ani údaje pacientů.
 
-## Verze 1.8.0 stable a ověření
+## Verze 1.8.8 stable a ověření
 
-Vydáno 22. 10. 2026. Stabilní desktopové vydání navazuje na uživatelské ověření běžného hledání a přípravy návštěvy a na potvrzený nález termínu v přesčase v živém Fyzionu.
+Vydáno 26. 10. 2026. Stabilní desktopové vydání navazuje na uživatelské ověření běžného hledání a přípravy návštěvy a na potvrzený nález termínu v přesčase v živém Fyzionu.
 
 Před vydáním prošly:
 
@@ -170,6 +185,42 @@ Před vydáním prošly:
 - kontrola instalačního webu, aktuálního README a záložní dokumentace bez JavaScriptu.
 
 Označení stable neznamená ověření všech kombinací prohlížečů, pracovišť a služeb. Celý postup skutečného uložení návštěvy nebyl při této závěrečné kontrole automatizován v živém přihlášeném Fyzionu. Dostupnost místností a souběh návštěv klienta u jiných terapeutů nejsou ověřovány.
+
+### Změna 1.8.8 — audit a opravy
+
+Audit potvrdil a opravil tři hraniční chyby: odmítání návštěvy končící přesně o půlnoci při neomezeném konci dostupnosti klienta, automatické převádění neexistujícího data z API na jiný den a neobnovení levého spodního rohu při importu výchozí polohy.
+
+Prošlo všech 12 testovacích sad včetně nových regresních testů. Podrobnosti a rozsah ověření: [Audit 1.8.7 → 1.8.8](AUDIT-1.8.8.md). Závěrečná kontrola nevytvářela ani neukládala návštěvy v živém Fyzionu.
+
+### Změna 1.8.7
+
+Událost obsahující v názvu slovo Oběd nebo obed (bez rozlišení velkých písmen) blokuje nabízené časy také v případě, že je označená jako přesčas. Platí pro běžné hledání, série, alternativy, přidávání termínu i kontrolu před přípravou návštěvy. Návštěva smí končit přesně na začátku oběda nebo začínat přesně na jeho konci, ale nesmí se překrývat.
+
+V kontrolním náhledu se oběd zobrazí oranžovým blokem s označením Oběd a časem od–do. Uchovává se pouze příznak oběda, ne původní název události ani údaje pacientů.
+
+### Změna 1.8.6
+
+Označení Lichý/Sudý týden je přímo vedle denního data (např. po 26. 10.) nad sloupci terapeutů. U názvu měsíce se nezobrazuje. Popisek se aktualizuje při změně data a při překreslení kalendáře.
+
+### Změna 1.8.5
+
+Nové tlačítko Obnovit poslední nastavená data ve Volných termínech. Ověřena obnova po refreshi, oddělení klientů, neplatné uložené údaje a zachování prázdných výsledků bez automatického hledání.
+
+### Změna 1.8.4
+
+Vedle data v horním záhlaví kalendáře se zobrazuje Lichý týden nebo Sudý týden a číslo týdne podle ISO (pondělí až neděle). Označení sleduje zobrazená data kalendáře. Při zobrazení více týdnů uvede obě označení. Nalezené termíny se nemění.
+
+### Změna 1.8.3
+
+Dlaždice Volné termíny je opět ukotvená 20 px od levého a spodního okraje. Panel se otevírá nad ní a po zavření se dlaždice neposune. Aktualizace jednorázově obnoví původní polohu; následné ruční přesuny se dál ukládají. Ruční návrat: + → Přenos na jiný počítač → Vrátit polohu panelu.
+
+### Změna 1.8.2
+
+Nová volba **Dnes pracují** vybírá terapeuty podle všech dnešních událostí a přesune kalendář na dnešní datum. Ověřeno testy hranic dne, změny času a integračním testem přepnutí kalendáře a filtru, včetně dne bez událostí.
+
+### Změna 1.8.1
+
+Přidat termín doplňuje návštěvy výhradně na konec série. Ověřeno jednotkovými i integračními testy, včetně odebrání prostřední návštěvy a správného přečíslování po doplnění.
 
 ### Hlavní změny
 
