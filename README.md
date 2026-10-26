@@ -190,8 +190,6 @@ Označení stable neznamená ověření všech kombinací prohlížečů, pracov
 
 Audit potvrdil a opravil tři hraniční chyby: odmítání návštěvy končící přesně o půlnoci při neomezeném konci dostupnosti klienta, automatické převádění neexistujícího data z API na jiný den a neobnovení levého spodního rohu při importu výchozí polohy.
 
-Prošlo všech 12 testovacích sad včetně nových regresních testů. Podrobnosti a rozsah ověření: [Audit 1.8.7 → 1.8.8](AUDIT-1.8.8.md). Závěrečná kontrola nevytvářela ani neukládala návštěvy v živém Fyzionu.
-
 ### Změna 1.8.7
 
 Událost obsahující v názvu slovo Oběd nebo obed (bez rozlišení velkých písmen) blokuje nabízené časy také v případě, že je označená jako přesčas. Platí pro běžné hledání, série, alternativy, přidávání termínu i kontrolu před přípravou návštěvy. Návštěva smí končit přesně na začátku oběda nebo začínat přesně na jeho konci, ale nesmí se překrývat.
