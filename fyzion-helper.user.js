@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fyzion+
 // @namespace    local.fyzion.helpers
-// @version      1.8.11
+// @version      1.8.12
 // @homepageURL  https://github.com/bruhaedwin/Fyzion_upravy
 // @description  Fyzion+ – společné menu vzhledu a volných termínů, nastavení a přenos mezi počítači.
 // @match        https://app.fyzion.cz/*
@@ -313,7 +313,7 @@
     return { slots: slots.slice(0, limit), more: more || slots.length > limit };
   }
   const PLUS_TIME_CSS = "/* Fyzion: casy pod udalostmi a nepruhlednym volnem.\n   Zkusebni varianta pro osu 00:00-24:00 po 15 minutach.\n   Pridat do existujiciho stylu omezeneho na web Fyzionu. */\n.fc:has(.fc-timegrid-slots tr:first-child [data-time=\"00:00:00\"]):has(.fc-timegrid-slots tr:last-child [data-time=\"23:45:00\"]):has(.fc-timegrid-slots tr:nth-child(96):last-child) .fc-timegrid-col:not(.fc-timegrid-axis) .fc-timegrid-col-frame::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  z-index: 0;\n  pointer-events: none;\n  background-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%222765%22%20viewBox%3D%220%200%20240%202765%22%20preserveAspectRatio%3D%22none%22%3E%3Cg%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2210%22%20fill%3D%22%23777777%22%3E%3Ctext%20x%3D%226%22%20y%3D%2212%22%3E00%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2240.802%22%3E00%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2269.604%22%3E00%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2298.406%22%3E00%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22127.208%22%3E01%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22156.01%22%3E01%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22184.812%22%3E01%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22213.615%22%3E01%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22242.417%22%3E02%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22271.219%22%3E02%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22300.021%22%3E02%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22328.823%22%3E02%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22357.625%22%3E03%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22386.427%22%3E03%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22415.229%22%3E03%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22444.031%22%3E03%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22472.833%22%3E04%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22501.635%22%3E04%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22530.437%22%3E04%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22559.24%22%3E04%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22588.042%22%3E05%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22616.844%22%3E05%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22645.646%22%3E05%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22674.448%22%3E05%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22703.25%22%3E06%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22732.052%22%3E06%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22760.854%22%3E06%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22789.656%22%3E06%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22818.458%22%3E07%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22847.26%22%3E07%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22876.062%22%3E07%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22904.865%22%3E07%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22933.667%22%3E08%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22962.469%22%3E08%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22991.271%22%3E08%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221020.073%22%3E08%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221048.875%22%3E09%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221077.677%22%3E09%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221106.479%22%3E09%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221135.281%22%3E09%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221164.083%22%3E10%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221192.885%22%3E10%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221221.687%22%3E10%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221250.49%22%3E10%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221279.292%22%3E11%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221308.094%22%3E11%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221336.896%22%3E11%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221365.698%22%3E11%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221394.5%22%3E12%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221423.302%22%3E12%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221452.104%22%3E12%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221480.906%22%3E12%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221509.708%22%3E13%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221538.51%22%3E13%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221567.312%22%3E13%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221596.115%22%3E13%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221624.917%22%3E14%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221653.719%22%3E14%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221682.521%22%3E14%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221711.323%22%3E14%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221740.125%22%3E15%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221768.927%22%3E15%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221797.729%22%3E15%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221826.531%22%3E15%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221855.333%22%3E16%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221884.135%22%3E16%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221912.937%22%3E16%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221941.74%22%3E16%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221970.542%22%3E17%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221999.344%22%3E17%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222028.146%22%3E17%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222056.948%22%3E17%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222085.75%22%3E18%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222114.552%22%3E18%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222143.354%22%3E18%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222172.156%22%3E18%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222200.958%22%3E19%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222229.76%22%3E19%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222258.562%22%3E19%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222287.365%22%3E19%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222316.167%22%3E20%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222344.969%22%3E20%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222373.771%22%3E20%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222402.573%22%3E20%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222431.375%22%3E21%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222460.177%22%3E21%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222488.979%22%3E21%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222517.781%22%3E21%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222546.583%22%3E22%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222575.385%22%3E22%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222604.187%22%3E22%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222632.99%22%3E22%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222661.792%22%3E23%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222690.594%22%3E23%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222719.396%22%3E23%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222748.198%22%3E23%3A45%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E\");\n  background-repeat: no-repeat;\n background-size: 240px 100%;\nbackground-position: left top;\n}";
-  const PLUS_VERSION = '1.8.11';
+  const PLUS_VERSION = '1.8.12';
   const PLUS_KEY = 'fyzion-plus-preferences-v1';
   const PLUS_DEFAULTS = Object.freeze({rangeExpanded:true,voucherCounter:true,therapistAutoHide:true,calendarWeekLabel:true,includeOvertime:true,firstWithin40:false,seriesModule:false,seriesCount:5,seriesSingle:true,therapistsModule:true,bookingModule:true,hideNativeVisitButton:false,showPreparationMessages:true,contrast:true,hidePopup:true,timeLabels:true,hideVisitStatus:true,hatch:true,
     offColor:'#bfc3ca',hatchColor:'#b9ddf5',duration:30,days:90,position:null});
@@ -2211,3 +2211,114 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true }); else mount();
 })();
+
+// Compact printing for the generated treatment report. The stored/editor HTML
+// and Fyzion's save/email actions are never modified.
+(() => {
+  'use strict';
+  if(typeof window==='undefined'||window.__fyzionCompactReportInstalled)return;
+  window.__fyzionCompactReportInstalled=true;
+  const KEY='fyzion-plus-report-print-v1',records=new Map();
+  const clean=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+  let settings={enabled:true,size:10.5},moduleControl=null;
+  try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&typeof saved.enabled==='boolean'&&[9,9.5,10,10.5,11,12].includes(saved.size))settings=saved;}catch(_){}
+  const textOf=button=>{const copy=button.cloneNode(true);copy.querySelectorAll('i,svg,.q-icon').forEach(node=>node.remove());return clean(copy.textContent);};
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(settings));}catch(_){}if(moduleControl)moduleControl.checked=settings.enabled;for(const r of records.values()){r.enabled.checked=settings.enabled;r.size.value=String(settings.size);}}
+  function printContent(editor){
+    if(editor.querySelector('svg,math,canvas,iframe,object,embed'))throw Error('Použijte původní tisk pro vloženou grafiku.');
+    const copy=editor.cloneNode(true);
+    copy.querySelectorAll('script,style,link,meta,iframe,object,embed,form,input,button,textarea,select,svg,math').forEach(node=>node.remove());
+    const tags=new Set('DIV P SPAN FONT STRONG B EM I U S SUB SUP BR HR H1 H2 H3 H4 H5 H6 TABLE THEAD TBODY TFOOT TR TD TH UL OL LI BLOCKQUOTE IMG A'.split(' '));
+    for(const node of [...copy.querySelectorAll('*')]){
+      if(!tags.has(node.tagName)){node.replaceWith(...node.childNodes);continue;}
+      const style=node.style,kept=[];
+      for(const prop of ['text-align','font-weight','font-style','text-decoration','color','border','border-width','border-style','border-color']){
+        const value=style.getPropertyValue(prop);if(value&&!/url|expression|var\(|@/i.test(value))kept.push(prop+':'+value);
+      }
+      const image=node.tagName==='IMG'?node.getAttribute('src'):null;
+      const cols=node.getAttribute('colspan'),rows=node.getAttribute('rowspan');
+      for(const attr of [...node.attributes])node.removeAttribute(attr.name);
+      if(kept.length)node.setAttribute('style',kept.join(';'));
+      if(node.tagName==='TD'||node.tagName==='TH')for(const [key,value]of [['colspan',cols],['rowspan',rows]])if(/^[1-9]\d?$/.test(value||''))node.setAttribute(key,value);
+      if(image){try{const url=new URL(image,location.href);if(['https:','blob:'].includes(url.protocol)||/^data:image\/(png|jpeg|gif|webp);base64,/i.test(image))node.setAttribute('src',url.href);}catch(_){} }
+    }
+    return copy.innerHTML;
+  }
+  function documentHtml(content,size){
+    return `<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>Závěrečná zpráva – tisk A4</title><style>
+      @page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{margin:0;color:#111;background:white;font-family:Arial,sans-serif}
+      #report{width:186mm;margin:0 auto;font-size:var(--report-font,${size}pt);line-height:1.15;overflow-wrap:anywhere}
+      #report *{font-size:inherit!important;line-height:inherit!important;max-width:100%;height:auto;overflow:visible}
+      #report p{margin:0 0 1.5mm}#report div{margin-top:0;margin-bottom:0}#report h1,#report h2,#report h3{font-size:1.12em!important;margin:2mm 0 1mm;break-after:avoid}
+      #report ul,#report ol{margin:1mm 0;padding-left:5mm}#report li{margin:0}#report table{width:100%;border-collapse:collapse}#report td,#report th{padding:1mm;vertical-align:top}
+      #report tr{break-inside:avoid}#report blockquote{margin:1mm 0 1mm 4mm}#report img{max-width:100%;max-height:55mm;object-fit:contain}
+      #print-tools{position:sticky;top:0;padding:10px;background:#f1f5f9;font:13px/1.4 Arial,sans-serif;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+      #print-tools button{padding:6px 10px}#measure{position:absolute;width:1mm;height:1mm;visibility:hidden}
+      @media screen{#report{padding:6mm 0}body{background:#fafafa}#report{background:white}}
+      @media print{#print-tools,#measure{display:none!important}#report{padding:0}html,body{width:auto;height:auto;overflow:visible}}
+    </style></head><body><div id="print-tools"><button id="print">Vytisknout / uložit PDF</button><button id="close">Zavřít</button><span id="print-status" role="status">Připravuji úsporný tisk…</span></div><i id="measure"></i><main id="report">${content}</main><script>
+      (async()=>{
+        const report=document.getElementById('report'),status=document.getElementById('print-status');
+        document.getElementById('print').onclick=()=>window.print();document.getElementById('close').onclick=()=>window.close();
+        if(document.fonts)await document.fonts.ready;
+        await Promise.all([...report.querySelectorAll('img')].map(img=>img.complete?null:new Promise(resolve=>{img.onload=img.onerror=resolve;setTimeout(resolve,3000);} )));
+        const mm=document.getElementById('measure').getBoundingClientRect().height,available=271*mm;
+        let size=${size};
+        const measure=()=>{report.style.setProperty('--report-font',size+'pt');return report.getBoundingClientRect().height-12*mm;};
+        let height=measure();while(height>available&&size>9){size=Math.max(9,size-.5);height=measure();}
+        // Screen-only padding is excluded from the measurement. No content is
+        // clipped and multi-page flow is retained at the minimum readable size.
+        const fits=height<=available;
+        report.dataset.fit=fits?'one-page':'multiple-pages';report.dataset.font=String(size);
+        status.textContent='Písmo '+size+' b. '+(fits?'Rozvržení pro jeden list A4.':'Zpráva je delší než jeden list A4; vytiskne se celá na více stranách.');
+        document.documentElement.dataset.ready='true';
+        if(fits)setTimeout(()=>window.print(),150);
+      })();
+    </script></body></html>`;
+  }
+  document.addEventListener('click',event=>{
+    const button=event.target.closest?.('button'),record=records.get(button);
+    if(!record||!record.marker.isConnected||!settings.enabled||button.disabled)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    try{
+      const editor=record.container.querySelector('.q-editor__content');if(!editor)throw Error('Text zprávy není načtený.');
+      const url=URL.createObjectURL(new Blob([documentHtml(printContent(editor),settings.size)],{type:'text/html;charset=utf-8'}));
+      const popup=window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000);
+      record.note.textContent=popup?'':'Prohlížeč zablokoval tiskové okno. Povolte vyskakovací okna pro Fyzion.';
+    }catch(_){record.note.textContent='Úsporný tisk se nepodařilo připravit. Vypněte jej a použijte původní tisk Fyzionu.';}
+  },true);
+  function sync(){
+    if(!moduleControl?.isConnected){
+      const root=[...document.documentElement.children].map(node=>node.shadowRoot).find(root=>root?.querySelector('#plus-bookingModule'));
+      const modules=root?.querySelector('#plus-bookingModule')?.closest('details')?.querySelector('.plus-switches');
+      if(modules){const label=document.createElement('label');moduleControl=document.createElement('input');moduleControl.type='checkbox';moduleControl.id='plus-reportPrint';moduleControl.checked=settings.enabled;
+        moduleControl.onchange=()=>{settings.enabled=moduleControl.checked;save();};label.append(moduleControl,' Úsporný tisk závěrečné zprávy (A4)');modules.insertBefore(label,modules.querySelector('fieldset'));}
+    }
+    for(const [button,r]of records)if(!button.isConnected||!r.container.isConnected||!r.marker.isConnected){r.controls.remove();records.delete(button);}
+    // This support text belongs specifically to VisitsReportPrintEditSection,
+    // not to receipts, appointment lists or individual visit printouts.
+    for(const marker of document.querySelectorAll('.cortex-hidden')){
+      if(!clean(marker.textContent).includes('jinou sablonu pro tuto zpravu'))continue;
+      let container=marker.parentElement;
+      for(let depth=0;container&&depth<8;depth++,container=container.parentElement){
+        if(container.querySelectorAll('.q-editor__content').length!==1)continue;
+        const buttons=[...container.querySelectorAll('button')].filter(b=>textOf(b)==='vytisknout');
+        if(buttons.length!==1)continue;
+        const button=buttons[0];if(records.has(button))break;
+        const controls=document.createElement('div');controls.dataset.fyzionReportPrint='true';controls.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font:12px/1.4 Arial,sans-serif;margin:7px 0;color:#52616b';
+        const label=document.createElement('label'),enabled=document.createElement('input');enabled.type='checkbox';enabled.checked=settings.enabled;label.append(enabled,' Úsporný tisk závěrečné zprávy na A4');
+        const size=document.createElement('select');size.setAttribute('aria-label','Velikost písma tiskové zprávy');
+        for(const n of [9,9.5,10,10.5,11,12]){const option=document.createElement('option');option.value=String(n);option.textContent=n+' b.';size.append(option);}size.value=String(settings.size);
+        const note=document.createElement('span');note.setAttribute('role','status');
+        enabled.onchange=()=>{settings.enabled=enabled.checked;save();};size.onchange=()=>{settings.size=Number(size.value);save();};
+        controls.append(label,size,note);let row=button;while(row.parentElement!==container)row=row.parentElement;container.insertBefore(controls,row);
+        records.set(button,{container,controls,enabled,size,note,marker});break;
+      }
+    }
+  }
+  let queued=false;
+  const schedule=()=>{if(queued)return;queued=true;setTimeout(()=>{queued=false;sync();},80);};
+  function start(){new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});sync();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+
