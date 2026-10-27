@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Fyzion+
 // @namespace    local.fyzion.helpers
-// @version      1.8.12
+// @version      1.8.17
 // @homepageURL  https://github.com/bruhaedwin/Fyzion_upravy
 // @description  Fyzion+ – společné menu vzhledu a volných termínů, nastavení a přenos mezi počítači.
 // @match        https://app.fyzion.cz/*
@@ -313,7 +313,7 @@
     return { slots: slots.slice(0, limit), more: more || slots.length > limit };
   }
   const PLUS_TIME_CSS = "/* Fyzion: casy pod udalostmi a nepruhlednym volnem.\n   Zkusebni varianta pro osu 00:00-24:00 po 15 minutach.\n   Pridat do existujiciho stylu omezeneho na web Fyzionu. */\n.fc:has(.fc-timegrid-slots tr:first-child [data-time=\"00:00:00\"]):has(.fc-timegrid-slots tr:last-child [data-time=\"23:45:00\"]):has(.fc-timegrid-slots tr:nth-child(96):last-child) .fc-timegrid-col:not(.fc-timegrid-axis) .fc-timegrid-col-frame::before {\n  content: \"\";\n  position: absolute;\n  inset: 0;\n  z-index: 0;\n  pointer-events: none;\n  background-image: url(\"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22240%22%20height%3D%222765%22%20viewBox%3D%220%200%20240%202765%22%20preserveAspectRatio%3D%22none%22%3E%3Cg%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2210%22%20fill%3D%22%23777777%22%3E%3Ctext%20x%3D%226%22%20y%3D%2212%22%3E00%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2240.802%22%3E00%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2269.604%22%3E00%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%2298.406%22%3E00%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22127.208%22%3E01%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22156.01%22%3E01%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22184.812%22%3E01%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22213.615%22%3E01%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22242.417%22%3E02%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22271.219%22%3E02%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22300.021%22%3E02%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22328.823%22%3E02%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22357.625%22%3E03%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22386.427%22%3E03%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22415.229%22%3E03%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22444.031%22%3E03%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22472.833%22%3E04%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22501.635%22%3E04%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22530.437%22%3E04%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22559.24%22%3E04%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22588.042%22%3E05%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22616.844%22%3E05%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22645.646%22%3E05%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22674.448%22%3E05%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22703.25%22%3E06%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22732.052%22%3E06%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22760.854%22%3E06%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22789.656%22%3E06%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22818.458%22%3E07%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22847.26%22%3E07%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22876.062%22%3E07%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22904.865%22%3E07%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22933.667%22%3E08%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22962.469%22%3E08%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%22991.271%22%3E08%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221020.073%22%3E08%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221048.875%22%3E09%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221077.677%22%3E09%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221106.479%22%3E09%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221135.281%22%3E09%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221164.083%22%3E10%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221192.885%22%3E10%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221221.687%22%3E10%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221250.49%22%3E10%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221279.292%22%3E11%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221308.094%22%3E11%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221336.896%22%3E11%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221365.698%22%3E11%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221394.5%22%3E12%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221423.302%22%3E12%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221452.104%22%3E12%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221480.906%22%3E12%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221509.708%22%3E13%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221538.51%22%3E13%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221567.312%22%3E13%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221596.115%22%3E13%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221624.917%22%3E14%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221653.719%22%3E14%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221682.521%22%3E14%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221711.323%22%3E14%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221740.125%22%3E15%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221768.927%22%3E15%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221797.729%22%3E15%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221826.531%22%3E15%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221855.333%22%3E16%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221884.135%22%3E16%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221912.937%22%3E16%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221941.74%22%3E16%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221970.542%22%3E17%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%221999.344%22%3E17%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222028.146%22%3E17%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222056.948%22%3E17%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222085.75%22%3E18%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222114.552%22%3E18%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222143.354%22%3E18%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222172.156%22%3E18%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222200.958%22%3E19%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222229.76%22%3E19%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222258.562%22%3E19%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222287.365%22%3E19%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222316.167%22%3E20%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222344.969%22%3E20%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222373.771%22%3E20%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222402.573%22%3E20%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222431.375%22%3E21%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222460.177%22%3E21%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222488.979%22%3E21%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222517.781%22%3E21%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222546.583%22%3E22%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222575.385%22%3E22%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222604.187%22%3E22%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222632.99%22%3E22%3A45%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222661.792%22%3E23%3A00%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222690.594%22%3E23%3A15%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222719.396%22%3E23%3A30%3C%2Ftext%3E%3Ctext%20x%3D%226%22%20y%3D%222748.198%22%3E23%3A45%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fsvg%3E\");\n  background-repeat: no-repeat;\n background-size: 240px 100%;\nbackground-position: left top;\n}";
-  const PLUS_VERSION = '1.8.12';
+  const PLUS_VERSION = '1.8.17';
   const PLUS_KEY = 'fyzion-plus-preferences-v1';
   const PLUS_DEFAULTS = Object.freeze({rangeExpanded:true,voucherCounter:true,therapistAutoHide:true,calendarWeekLabel:true,includeOvertime:true,firstWithin40:false,seriesModule:false,seriesCount:5,seriesSingle:true,therapistsModule:true,bookingModule:true,hideNativeVisitButton:false,showPreparationMessages:true,contrast:true,hidePopup:true,timeLabels:true,hideVisitStatus:true,hatch:true,
     offColor:'#bfc3ca',hatchColor:'#b9ddf5',duration:30,days:90,position:null});
@@ -1241,11 +1241,16 @@
     `;
     const settingsDock=document.createElement('div');settingsDock.id='settings-dock';
     const settingsToggle=root.getElementById('settings-toggle');
-    settingsToggle.textContent='+';settingsToggle.title='Nastavení Fyzion+';
-    settingsToggle.setAttribute('aria-label','Otevřít nastavení Fyzion+');settingsToggle.setAttribute('aria-controls','settings');
+    settingsToggle.replaceChildren();
+    const plusSymbol=document.createElement('span');plusSymbol.textContent='+';
+    const versionBadge=document.createElement('small');versionBadge.textContent=PLUS_VERSION;versionBadge.id='settings-version';versionBadge.style.cssText='display:inline-block;margin-left:8px;font:500 12px/1.4 Arial,sans-serif;color:#777;white-space:nowrap';
+    settingsToggle.append(plusSymbol);settingsToggle.dataset.fyzionVersion=PLUS_VERSION;
+    settingsToggle.style.cssText='display:flex;align-items:center;justify-content:center;width:32px;height:32px;font-size:27px;line-height:1';
+    settingsToggle.title='Nastavení Fyzion+ · '+PLUS_VERSION;
+    settingsToggle.setAttribute('aria-label','Otevřít nastavení Fyzion+ '+PLUS_VERSION);settingsToggle.setAttribute('aria-controls','settings');
     const settingsBody=root.getElementById('settings');
     const settingsHeader=document.createElement('div');settingsHeader.id='settings-header';
-    const settingsTitle=document.createElement('h2');settingsTitle.textContent='Nastavení Fyzion+';
+    const settingsTitle=document.createElement('h2');settingsTitle.textContent='Nastavení Fyzion+';settingsTitle.append(versionBadge);
     const settingsClose=document.createElement('button');settingsClose.id='settings-close';settingsClose.type='button';settingsClose.textContent='×';settingsClose.setAttribute('aria-label','Zavřít nastavení Fyzion+');
     settingsHeader.append(settingsTitle);settingsHeader.append(settingsClose);settingsBody.prepend(settingsHeader);
     settingsDock.append(settingsToggle);settingsDock.append(settingsBody);settingsRoot.append(settingsStyle);settingsRoot.append(settingsDock);
@@ -1263,8 +1268,8 @@
         return image.getClientRects().length&&box.left<300&&box.top>=0&&box.top<180&&box.width>=70&&box.height>=15&&/fyzion|logo/i.test(`${image.alt} ${image.getAttribute('src')||''}`);
       }).sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top);
       const logo=logos[0]?.getBoundingClientRect();
-      const left=Math.max(8,Math.min(logo?.left??8,innerWidth-40));
-      const top=Math.max(4,Math.min(logo?logo.top-38:8,innerHeight-40));
+      const left=Math.max(8,Math.min(logo?.left??8,innerWidth-60));
+      const top=Math.max(4,Math.min(logo?logo.top-38:8,innerHeight-52));
       settingsDock.style.left=left+'px';settingsDock.style.top=top+'px';
       settingsBody.style.width=Math.max(150,Math.min(420,innerWidth-left-8))+'px';
       settingsBody.style.maxHeight=Math.max(100,innerHeight-top-50)+'px';
@@ -2212,21 +2217,106 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true }); else mount();
 })();
 
-// Compact printing for the generated treatment report. The stored/editor HTML
-// and Fyzion's save/email actions are never modified.
+// Treatment report cleanup and compact printing. Editor cleanup emits the
+// native input event; saving/sending remains an explicit action in Fyzion.
 (() => {
   'use strict';
   if(typeof window==='undefined'||window.__fyzionCompactReportInstalled)return;
   window.__fyzionCompactReportInstalled=true;
   const KEY='fyzion-plus-report-print-v1',records=new Map();
   const clean=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
-  let settings={enabled:true,size:10.5},moduleControl=null;
-  try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&typeof saved.enabled==='boolean'&&[9,9.5,10,10.5,11,12].includes(saved.size))settings=saved;}catch(_){}
+  let settings={enabled:true,size:10.5,cleanEditor:true},moduleControl=null,cleanupControl=null;
+  try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&typeof saved.enabled==='boolean'&&[9,9.5,10,10.5,11,12].includes(saved.size))settings={enabled:saved.enabled,size:saved.size,cleanEditor:saved.cleanEditor!==false};}catch(_){}
   const textOf=button=>{const copy=button.cloneNode(true);copy.querySelectorAll('i,svg,.q-icon').forEach(node=>node.remove());return clean(copy.textContent);};
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(settings));}catch(_){}if(moduleControl)moduleControl.checked=settings.enabled;for(const r of records.values()){r.enabled.checked=settings.enabled;r.size.value=String(settings.size);}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(settings));}catch(_){}if(moduleControl)moduleControl.checked=settings.enabled;if(cleanupControl)cleanupControl.checked=settings.cleanEditor;for(const r of records.values()){r.enabled.checked=settings.enabled;r.size.value=String(settings.size);r.cleaner.checked=settings.cleanEditor;}}
+  function reportLines(root){
+    const lines=[];let parts=[];
+    const finish=br=>{if(parts.length)lines.push({parts,text:parts.map(part=>part.node.data.slice(part.start,part.end)).join(''),br});parts=[];};
+    const block=new Set(['P','DIV','LI','H1','H2','H3','H4','H5','H6','TR','BLOCKQUOTE','SECTION','HEADER']);
+    function visit(node){
+      if(node.nodeType===3){let start=0;const value=node.data;for(let i=0;i<=value.length;i++)if(i===value.length||value[i]==='\n'){if(i>start)parts.push({node,start,end:i});if(i<value.length)finish(null);start=i+1;}return;}
+      if(node.nodeType!==1)return;if(node.tagName==='BR'){finish(node);return;}
+      if(block.has(node.tagName))finish(null);
+      for(const child of node.childNodes)visit(child);
+      if(block.has(node.tagName))finish(null);
+    }
+    for(const node of root.childNodes)visit(node);finish(null);return lines;
+  }
+  function pruneEmpty(root){for(const node of [...root.querySelectorAll('p,div,span,strong,b,em,i,li')].reverse())if(!clean(node.textContent)&&!node.querySelector('img,svg,canvas,table,hr'))node.remove();}
+  function removeVisitSchedule(copy){
+    const heading=text=>/^(terminy(?: navstev| terapii| osetreni)?|prehled (?:terminu|navstev)|data navstev|navstevy)[:.]?$/.test(clean(text));
+    const onlyDates=text=>{
+      let value=clean(text);if(!/(?:\d{1,2}\.\s*\d{1,2}\.|\d{4}-\d{2}-\d{2})/.test(value))return false;
+      value=value.replace(/\d{4}-\d{2}-\d{2}|\d{1,2}\.\s*\d{1,2}\.(?:\s*\d{4})?|\d{1,2}:\d{2}/g,'').replace(/\b(?:pondeli|utery|streda|ctvrtek|patek|sobota|nedele|po|ut|st|ct|pa|so|ne|v|hod|hodin)\b/g,'');
+      return /^[\s,;|•·()\[\]\-–—]*$/.test(value);
+    };
+    const previousHeading=node=>{let p=node.previousElementSibling;while(p&&!clean(p.textContent)&&!p.querySelector('img,table')){const old=p;p=p.previousElementSibling;old.remove();}return p&&heading(p.textContent)?p:null;};
+    const columns=new Set(['datum','cas','datum a cas','termin','datum navstevy','termin navstevy','datum osetreni','sluzba','vykon','terapeut','fyzioterapeut','delka','delka navstevy','od','do']);
+    for(const table of [...copy.querySelectorAll('table')]){
+      const row=table.rows[0],labels=row?[...row.cells].map(cell=>clean(cell.textContent).replace(/:$/,'')):[];
+      if(labels.length&&labels.some(label=>['datum','datum a cas','termin','datum navstevy','termin navstevy','datum osetreni'].includes(label))&&labels.every(label=>columns.has(label))){previousHeading(table)?.remove();table.remove();}
+    }
+    for(const list of [...copy.querySelectorAll('ul,ol')])if(previousHeading(list)&&[...list.children].length&&[...list.children].every(item=>onlyDates(item.textContent))){previousHeading(list)?.remove();list.remove();}
+    for(const node of [...copy.querySelectorAll('p,div,h1,h2,h3,h4')]){
+      if(node.querySelector('p,div,h1,h2,h3,h4,table,ul,ol'))continue;
+      const match=/^(terminy(?: navstev| terapii| osetreni)?|prehled terminu|data navstev)\s*:\s*(.+)$/.exec(clean(node.textContent));
+      if(match&&onlyDates(match[2]))node.remove();
+    }
+    const months='ledna|unora|brezna|dubna|kvetna|cervna|cervence|srpna|zari|rijna|listopadu|prosince';
+    const date='(?:\\d{4}-\\d{2}-\\d{2}|\\d{1,2}\\.\\s*(?:'+months+')\\s+\\d{4}|\\d{1,2}\\.\\s*\\d{1,2}\\.(?:\\s*\\d{4})?)';
+    const visitLine=new RegExp('^'+date+'(?:\\s*[-–—•:]?\\s*(?:provedene )?vykony\\s*:.*)?$');
+    const actionsLine=text=>{
+      const prefix=/^[\[(]?\s*(?:provedene )?vykony\s*:\s*/.exec(text);
+      if(!prefix)return false;const rest=text.slice(prefix[0].length);
+      return !rest||/\b\d{5}\b/.test(rest)||/^\(poz\./.test(rest);
+    };
+    const billingContinuation=text=>{
+      if(/^\(poz\.[^)]*\)\s*$/.test(text))return true;
+      if(!/\b\d{5}\b/.test(text))return false;
+      return /^[\s,;|•·\[\]()\-–—]*$/.test(text.replace(/\([^)]*\)/g,'').replace(/\b\d+\s*x\s*/g,'').replace(/\b\d{5}\b/g,''));
+    };
+    // Generated reports also use a flat list: Czech date + billed actions.
+    // Remove the full administrative row while preserving dated clinical prose.
+    for(const row of [...copy.querySelectorAll('tr')]){const text=clean([...row.cells].map(cell=>cell.textContent).join(' '));if(visitLine.test(text)||actionsLine(text))row.remove();}
+    let inActions=false;const remove=[];
+    for(const line of reportLines(copy)){
+      const text=clean(line.text);
+      if(actionsLine(text)){inActions=true;remove.push(line);}
+      else if(visitLine.test(text)){inActions=false;remove.push(line);}
+      else if(inActions&&billingContinuation(text))remove.push(line);
+      else if(text)inActions=false;
+    }
+    for(const line of remove.reverse()){
+      const first=line.parts[0],last=line.parts[line.parts.length-1],range=document.createRange();range.setStart(first.node,first.start);range.setEnd(last.node,last.end);range.deleteContents();line.br?.remove();
+    }
+    pruneEmpty(copy);
+    const headers=new Set();
+    for(const header of copy.querySelectorAll('.print-header,.head,header')){
+      const text=clean(header.textContent);if(!text)continue;
+      if(headers.has(text))header.remove();else headers.add(text);
+    }
+  }
+  function removeSalutation(copy){
+    const line=reportLines(copy).find(line=>/^s\s*po[zy]dravem(?:\s|[,.:!]|$)/.test(clean(line.text)));
+    if(!line)return;
+    const first=line.parts[0],range=document.createRange();range.setStart(first.node,first.start);range.setEnd(copy,copy.childNodes.length);range.deleteContents();pruneEmpty(copy);
+  }
+  function cleanEditor(record,force=false){
+    if(!settings.cleanEditor)return;
+    const editor=record.container.querySelector('.q-editor__content');
+    if(!editor||editor.getAttribute('contenteditable')==='false'||!clean(editor.textContent))return;
+    if(!force&&(record.userEdited||editor===document.activeElement||editor.contains(document.activeElement)))return;
+    const before=editor.innerHTML;if(before===record.cleaned)return;
+    const copy=editor.cloneNode(true);removeVisitSchedule(copy);removeSalutation(copy);
+    const after=copy.innerHTML;if(before===after)return;
+    record.original=before;record.cleaned=after;record.userEdited=false;record.undo.disabled=false;
+    editor.innerHTML=after;editor.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertReplacementText'}));
+    record.note.textContent='Ze zprávy odstraněny rozpoznané termíny, výpisy výkonů a celý závěr od „S pozdravem“. Změny zatím nejsou uložené.';
+  }
   function printContent(editor){
     if(editor.querySelector('svg,math,canvas,iframe,object,embed'))throw Error('Použijte původní tisk pro vloženou grafiku.');
     const copy=editor.cloneNode(true);
+    if(settings.cleanEditor){removeVisitSchedule(copy);removeSalutation(copy);}
     copy.querySelectorAll('script,style,link,meta,iframe,object,embed,form,input,button,textarea,select,svg,math').forEach(node=>node.remove());
     const tags=new Set('DIV P SPAN FONT STRONG B EM I U S SUB SUP BR HR H1 H2 H3 H4 H5 H6 TABLE THEAD TBODY TFOOT TR TD TH UL OL LI BLOCKQUOTE IMG A'.split(' '));
     for(const node of [...copy.querySelectorAll('*')]){
@@ -2252,6 +2342,7 @@
       #report p{margin:0 0 1.5mm}#report div{margin-top:0;margin-bottom:0}#report h1,#report h2,#report h3{font-size:1.12em!important;margin:2mm 0 1mm;break-after:avoid}
       #report ul,#report ol{margin:1mm 0;padding-left:5mm}#report li{margin:0}#report table{width:100%;border-collapse:collapse}#report td,#report th{padding:1mm;vertical-align:top}
       #report tr{break-inside:avoid}#report blockquote{margin:1mm 0 1mm 4mm}#report img{max-width:100%;max-height:55mm;object-fit:contain}
+      #report thead,#report tfoot{display:table-row-group!important}
       #print-tools{position:sticky;top:0;padding:10px;background:#f1f5f9;font:13px/1.4 Arial,sans-serif;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
       #print-tools button{padding:6px 10px}#measure{position:absolute;width:1mm;height:1mm;visibility:hidden}
       @media screen{#report{padding:6mm 0}body{background:#fafafa}#report{background:white}}
@@ -2277,7 +2368,9 @@
     </script></body></html>`;
   }
   document.addEventListener('click',event=>{
-    const button=event.target.closest?.('button'),record=records.get(button);
+    const button=event.target.closest?.('button');if(!button)return;
+    for(const record of records.values())if(record.container.contains(button)&&['vytisknout','ulozit','odeslat pacientovi'].includes(textOf(button)))cleanEditor(record,true);
+    const record=records.get(button);
     if(!record||!record.marker.isConnected||!settings.enabled||button.disabled)return;
     event.preventDefault();event.stopImmediatePropagation();
     try{
@@ -2287,12 +2380,14 @@
       record.note.textContent=popup?'':'Prohlížeč zablokoval tiskové okno. Povolte vyskakovací okna pro Fyzion.';
     }catch(_){record.note.textContent='Úsporný tisk se nepodařilo připravit. Vypněte jej a použijte původní tisk Fyzionu.';}
   },true);
+  document.addEventListener('input',event=>{if(!event.isTrusted)return;for(const record of records.values())if(record.container.querySelector('.q-editor__content')?.contains(event.target))record.userEdited=true;},true);
   function sync(){
     if(!moduleControl?.isConnected){
       const root=[...document.documentElement.children].map(node=>node.shadowRoot).find(root=>root?.querySelector('#plus-bookingModule'));
       const modules=root?.querySelector('#plus-bookingModule')?.closest('details')?.querySelector('.plus-switches');
       if(modules){const label=document.createElement('label');moduleControl=document.createElement('input');moduleControl.type='checkbox';moduleControl.id='plus-reportPrint';moduleControl.checked=settings.enabled;
-        moduleControl.onchange=()=>{settings.enabled=moduleControl.checked;save();};label.append(moduleControl,' Úsporný tisk závěrečné zprávy (A4)');modules.insertBefore(label,modules.querySelector('fieldset'));}
+        moduleControl.onchange=()=>{settings.enabled=moduleControl.checked;save();};label.append(moduleControl,' Úsporný tisk závěrečné zprávy (A4)');modules.insertBefore(label,modules.querySelector('fieldset'));
+        const cleanupLabel=document.createElement('label');cleanupControl=document.createElement('input');cleanupControl.type='checkbox';cleanupControl.id='plus-reportCleanup';cleanupControl.checked=settings.cleanEditor;cleanupControl.onchange=()=>{settings.cleanEditor=cleanupControl.checked;save();if(settings.cleanEditor)for(const record of records.values())cleanEditor(record,true);};cleanupLabel.append(cleanupControl,' Závěrečná zpráva bez termínů a pozdravu');modules.insertBefore(cleanupLabel,modules.querySelector('fieldset'));}
     }
     for(const [button,r]of records)if(!button.isConnected||!r.container.isConnected||!r.marker.isConnected){r.controls.remove();records.delete(button);}
     // This support text belongs specifically to VisitsReportPrintEditSection,
@@ -2310,15 +2405,123 @@
         const size=document.createElement('select');size.setAttribute('aria-label','Velikost písma tiskové zprávy');
         for(const n of [9,9.5,10,10.5,11,12]){const option=document.createElement('option');option.value=String(n);option.textContent=n+' b.';size.append(option);}size.value=String(settings.size);
         const note=document.createElement('span');note.setAttribute('role','status');
+        const cleanupLabel=document.createElement('label'),cleaner=document.createElement('input');cleaner.type='checkbox';cleaner.checked=settings.cleanEditor;cleanupLabel.append(cleaner,' Odstranit termíny návštěv a „S pozdravem“');
+        const undo=document.createElement('button');undo.type='button';undo.textContent='Vrátit odstraněné části';undo.disabled=true;
         enabled.onchange=()=>{settings.enabled=enabled.checked;save();};size.onchange=()=>{settings.size=Number(size.value);save();};
-        controls.append(label,size,note);let row=button;while(row.parentElement!==container)row=row.parentElement;container.insertBefore(controls,row);
-        records.set(button,{container,controls,enabled,size,note,marker});break;
+        controls.append(label,size,cleanupLabel,undo,note);let row=button;while(row.parentElement!==container)row=row.parentElement;container.insertBefore(controls,row);
+        const record={container,controls,enabled,size,note,marker,cleaner,undo};
+        cleaner.onchange=()=>{settings.cleanEditor=cleaner.checked;save();if(settings.cleanEditor)cleanEditor(record,true);};
+        undo.onclick=()=>{const editor=container.querySelector('.q-editor__content');if(!editor||!record.original)return;
+          if(editor.innerHTML!==record.cleaned){note.textContent='Text byl mezitím ručně upraven. Automatické vrácení by jej přepsalo; původní části zůstávají uchované do zavření zprávy.';return;}
+          settings.cleanEditor=false;save();editor.innerHTML=record.original;editor.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'historyUndo'}));undo.disabled=true;note.textContent='Původní části obnoveny; automatické čištění vypnuto.';};
+        records.set(button,record);break;
       }
     }
+    for(const record of records.values())cleanEditor(record);
   }
   let queued=false;
   const schedule=()=>{if(queued)return;queued=true;setTimeout(()=>{queued=false;sync();},80);};
   function start(){new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});sync();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+
+(() => {
+  'use strict';
+  if(typeof window==='undefined'||window.__fyzionFtOverviewInstalled)return;
+  window.__fyzionFtOverviewInstalled=true;
+  const clean=text=>String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+  const patient=()=>/^\/patients\/(?:detail\/)?([0-9]+|[0-9a-f-]{36})(?:\/|$)/i.exec(location.pathname)?.[1]||null;
+  const cache=new Map(),rows=new Map(),hints=new Map(),KEY='fyzion-plus-ft-overview-v1';
+  let prefs={count:true,deadline:true},queued=false,lastPatient=patient(),countControl=null,deadlineControl=null;
+  try{const value=JSON.parse(localStorage.getItem(KEY)||'null');if(value&&typeof value.count==='boolean'&&typeof value.deadline==='boolean')prefs=value;}catch(_){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(prefs));}catch(_){}schedule();}
+  function parseDate(raw){
+    let date=String(raw||'').trim();const match=/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})$/.exec(date);
+    if(match)date=match[3]+'-'+match[2].padStart(2,'0')+'-'+match[1].padStart(2,'0');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date.startsWith('0000'))return null;
+    const ms=Date.parse(date+'T12:00:00Z');return Number.isFinite(ms)&&new Date(ms).toISOString().slice(0,10)===date?{date,ms}:null;
+  }
+  function today(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Prague',year:'numeric',month:'2-digit',day:'2-digit'}).format(Date.now());}
+  const labelDate=date=>{const [y,m,d]=date.split('-');return Number(d)+'. '+Number(m)+'. '+y;};
+  function countVisits(actions){
+    if(!Array.isArray(actions))return null;const ids=new Set();
+    for(const row of actions){if(!row||typeof row!=='object')return null;const id=row.visit_id;
+      if(id==null||id===''){if(row.visit_date)return null;continue;}
+      if(!['string','number'].includes(typeof id)||!String(id).trim()||String(id).length>200)return null;ids.add(String(id));
+    }return ids.size;
+  }
+  function endpoint(raw,method){try{const url=new URL(raw,location.href);if(url.origin!=='https://api.fyzion.cz')return null;
+    const match=/^\/v1\/ft-tickets\/([0-9]+|[0-9a-f-]{36})(?:\/([0-9]+|[0-9a-f-]{36}))?\/$/i.exec(url.pathname);
+    if(method!=='GET'){if(/^\/v1\/(?:ft-tickets|ft-action-visits|visits)\//.test(url.pathname)||/logout/.test(url.pathname)){cache.clear();schedule();}return null;}
+    return match?{patientId:match[1],ticketId:match[2]||null}:null;
+  }catch(_){return null;}}
+  function absorb(info,status,body){
+    const current=patient();if(info.patientId!==current)return;
+    if(current!==lastPatient){cache.clear();lastPatient=current;}
+    if(status!==200){cache.delete(info.patientId);schedule();return;}
+    const list=info.ticketId?[body]:body;if(!Array.isArray(list)){cache.delete(info.patientId);schedule();return;}
+    let tickets=info.ticketId?(cache.get(info.patientId)||[]):[];
+    for(const item of list){if(!item||!item.id)continue;const raw=String(item.issue_date||'');
+      const localDate=raw.includes('T')&&Number.isFinite(Date.parse(raw))?new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Prague',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(raw)):raw;
+      const issued=parseDate(localDate);
+      const entry={id:String(item.id),date:issued?.date||null,diagnosis:clean(item.diagnosis?.code_with_dot||item.diagnosis?.code).replace(/\./g,''),icp:String(item.insurance_workspace?.icp||''),actions:item.actions_count_total,count:countVisits(item.ft_actions),loaded:Date.now()};
+      tickets=tickets.filter(ticket=>ticket.id!==entry.id);tickets.push(entry);
+    }
+    cache.set(info.patientId,tickets);if(cache.size>5)cache.delete(cache.keys().next().value);schedule();
+  }
+  const originalFetch=window.fetch;
+  window.fetch=function(input,init){const info=endpoint(typeof input==='string'||input instanceof URL?String(input):input.url,String(init?.method||input?.method||'GET').toUpperCase());
+    const result=originalFetch.apply(this,arguments);if(info)result.then(response=>response.clone().json().then(body=>absorb(info,response.status,body),()=>absorb(info,response.status,null)),()=>{});return result;
+  };
+  const open=XMLHttpRequest.prototype.open,send=XMLHttpRequest.prototype.send,requests=new WeakMap();
+  XMLHttpRequest.prototype.open=function(method,url){requests.set(this,endpoint(String(url),String(method).toUpperCase()));return open.apply(this,arguments);};
+  XMLHttpRequest.prototype.send=function(){const info=requests.get(this);if(info)this.addEventListener('loadend',()=>{let body=null;try{body=this.responseType==='json'?this.response:JSON.parse(this.responseText);}catch(_){}absorb(info,this.status,body);},{once:true});return send.apply(this,arguments);};
+  function setText(node,text){if(node.textContent!==text)node.textContent=text;}
+  function syncCounts(){
+    for(const [details,row]of rows)if(!details.isConnected||!prefs.count){row.remove();rows.delete(details);}
+    if(!prefs.count)return;
+    for(const details of document.querySelectorAll('.ft-ticket-details')){
+      let row=rows.get(details);const source=[...details.querySelectorAll('tr')].find(row=>clean(row.cells[0]?.textContent).replace(/:$/,'')==='pocet vykonu');
+      if(!source)continue;
+      if(!row){row=document.createElement('tr');row.dataset.fyzionFtVisitCount='true';const label=document.createElement('td'),value=document.createElement('td'),strong=document.createElement('strong');label.textContent='Počet návštěv:';value.append(strong);row.append(label,value);source.after(row);rows.set(details,row);}
+      const card=details.closest('.q-expansion-item'),title=card?.querySelector('.ft-title')?.textContent||'',dateMatch=/(\d{1,2}\.\s*\d{1,2}\.\s*\d{4})/.exec(title),issued=dateMatch?parseDate(dateMatch[1]):null;
+      const icpRow=[...details.querySelectorAll('tr')].find(row=>clean(row.cells[0]?.textContent).replace(/:$/,'')==='icp'),icp=icpRow?.cells[1]?.textContent.trim();
+      const normalizedTitle=clean(title).replace(/\./g,''),actions=Number(source.cells[1]?.textContent.trim());
+      const candidates=(cache.get(patient())||[]).filter(ticket=>ticket.date===issued?.date&&ticket.icp===icp&&ticket.diagnosis&&normalizedTitle.split(/[^a-z0-9]+/).includes(ticket.diagnosis)&&ticket.actions===actions);
+      const value=row.querySelector('strong');
+      if(candidates.length===1&&candidates[0].count!==null){setText(value,String(candidates[0].count));row.title='Jedinečné návštěvy s alespoň jedním zapsaným výkonem tohoto FT poukazu. Více výkonů při jedné návštěvě se počítá jednou. Stav podle posledního načtení poukazu.';}
+      else{setText(value,'Nelze ověřit');row.title=candidates.length>1?'Poukaz nelze jednoznačně přiřadit.':'Pro ověření počtu obnovte údaje poukazů ve Fyzionu. Návštěvy bez přiřazených výkonů se nezapočítávají.';}
+    }
+  }
+  function syncDeadlines(){
+    for(const [field,hint]of hints)if(!field.isConnected||!prefs.deadline){hint.remove();hints.delete(field);}
+    if(!prefs.deadline)return;
+    for(const form of document.querySelectorAll('form.q-form')){
+      const fields=[...form.querySelectorAll('label.q-field')];
+      if(!fields.some(field=>clean(field.querySelector('.q-field__before p')?.textContent).replace(/\*/g,'').trim()==='icp zadatele')||!fields.some(field=>clean(field.querySelector('.q-field__before p')?.textContent).replace(/\*/g,'').trim()==='datum expirace'))continue;
+      const issue=fields.filter(field=>clean(field.querySelector('.q-field__before p')?.textContent).replace(/\*/g,'').trim()==='datum vystaveni');if(issue.length!==1)continue;
+      const field=issue[0],input=field.querySelector('input.q-field__native');if(!input)continue;
+      let hint=hints.get(field);if(!hint){hint=document.createElement('p');hint.dataset.fyzionFtDeadline='true';hint.setAttribute('role','status');hint.style.cssText='box-sizing:border-box;width:100%;margin:4px 0 10px;padding:5px 8px;border-left:2px solid #dce4e8;color:#526571;font:12px/1.45 Arial,sans-serif';let anchor=field;while(anchor.parentElement!==form&&anchor.parentElement?.classList.contains('row'))anchor=anchor.parentElement;anchor.after(hint);hints.set(field,hint);}
+      const date=parseDate(input.value),now=parseDate(today());let warning=false,text;
+      if(!input.value.trim())text='Po zadání data vystavení zobrazím 40denní lhůtu pro první návštěvu.';
+      else if(!date){warning=true;text='Datum vystavení není platné. Lhůtu nelze vypočítat.';}
+      else{const days=Math.round((now.ms-date.ms)/86400000),last=labelDate(new Date(date.ms+40*86400000).toISOString().slice(0,10));warning=days<0||days>40;
+        text=days<0?'Datum vystavení je v budoucnosti. Zkontrolujte jej.':days>40?'Od vystavení '+days+' dní. Lhůta 40 dní pro první návštěvu skončila '+last+' (překročena o '+(days-40)+' dní).':days===40?'Dnes je poslední den 40denní lhůty pro první návštěvu ('+last+').':'Od vystavení '+days+' dní z 40. První návštěva nejpozději '+last+'; zbývá '+(40-days)+' dní.';
+      }
+      setText(hint,text);hint.dataset.warning=String(warning);hint.style.color=warning?'#a33d2c':'#526571';hint.style.borderColor=warning?'#d69789':'#dce4e8';
+    }
+  }
+  function modules(){
+    if(countControl?.isConnected&&deadlineControl?.isConnected)return;
+    const root=[...document.documentElement.children].map(node=>node.shadowRoot).find(root=>root?.querySelector('#plus-bookingModule'));
+    const group=root?.querySelector('#plus-bookingModule')?.closest('details')?.querySelector('.plus-switches');if(!group)return;
+    for(const [key,id,text]of [['count','plus-ftVisitCount','Počet návštěv u FT poukazu'],['deadline','plus-ftAcceptanceDeadline','Lhůta 40 dní při přijetí FT poukazu']]){
+      const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.id=id;input.checked=prefs[key];input.onchange=()=>{prefs[key]=input.checked;save();};label.append(input,' '+text);group.insertBefore(label,group.querySelector('fieldset'));if(key==='count')countControl=input;else deadlineControl=input;
+    }
+  }
+  function sync(){queued=false;const current=patient();if(current!==lastPatient){cache.clear();lastPatient=current;}modules();syncCounts();syncDeadlines();}
+  function schedule(){if(queued)return;queued=true;setTimeout(sync,80);}
+  function start(){new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});document.addEventListener('input',schedule,true);document.addEventListener('change',schedule,true);setInterval(schedule,1000);sync();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 
