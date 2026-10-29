@@ -2,9 +2,98 @@
 
 Neoficiální desktopový pomocník pro [Fyzion](https://app.fyzion.cz/). Přidává hledání volných termínů, plánování sérií, přípravu návštěvy z karty klienta a volitelné úpravy vzhledu.
 
-**Verze 1.8.8 stable** · Uživatelský skript pro Tampermonkey · České rozhraní · Desktop stable
+**Verze 1.8.17 stable** · Uživatelský skript pro Tampermonkey · České rozhraní · Desktop stable
 
 > Skript návštěvy automaticky neukládá. Výsledky hledání nejsou rezervace. Před uložením vždy zkontrolujte klienta, službu, terapeuta, místnost, délku a datum s časem.
+
+## Změny 1.8.17 — verze v okně nastavení
+
+Číslo verze se zobrazuje uvnitř otevřeného okna vedle nadpisu Nastavení Fyzion+. Růžová dlaždice zobrazuje pouze symbol +.
+
+## Změny 1.8.16 — samostatné výpisy výkonů
+
+Čištění závěrečné zprávy nově odstraní také samostatné administrativní řádky začínající **Výkony:**, které už nemají před sebou datum. Odstraní i žadatele v závorce, kódy výkonů, násobky, časy a diagnostické kódy v tomto výpisu.
+
+Rozpoznání funguje v odstavci, vnořených značkách, tabulce a při rozdělení kódů přes více řádků. Souhrnný počet návštěv a klinické věty zůstávají zachované. Samotná klinická věta začínající Výkony bez administrativních kódů se automaticky nemaže. Dosavadní odstranění dat návštěv a celého závěru od S pozdravem zůstává zachované.
+
+Úprava se promítá přímo do editoru a modelu předaného původnímu tlačítku Uložit. Skript sám nic neukládá. Před uložením obsah zkontrolujte. Vrácení odstraněných částí a přepínač čištění v Modulech zůstávají dostupné.
+
+Po aktualizaci obnovte Fyzion a otevřete zprávu znovu. Dlaždice + musí zobrazovat **1.8.16**. Při testu byly odstraněny výpisy včetně zalomených pokračování a zachovány klinické věty, počet návštěv i funkce vrácení původního textu. Test používal modelová data.
+
+## Změny 1.8.15 — konkrétní formát termínů, celý podpisový závěr a číslo verze
+
+- Čištění zprávy rozpoznává i řádky s českým datem slovně a následným výpisem výkonů, například **6. května 2025 Výkony: …**, a samostatné termíny typu **1. září 2026**. Odstraňuje tyto administrativní řádky přímo v editoru, včetně formátování po odstavcích, zalomeních řádků a v tabulkách.
+- Souhrnný **Počet návštěv** se ponechává. Klinický text, včetně dat popisujících vyšetření a nález, se zachovává.
+- Od samostatné řádky **S pozdravem** se odstraní vše do konce zprávy: podpis, pracoviště, kontakty i další text pod pozdravem. Funguje i přes více odstavců a vnořených bloků. Podporován je také překlep **S poydravem**.
+- Úprava se propisuje do modelu editoru, takže ji dostanou i původní tlačítka Uložit a Odeslat. Skript sám zprávu neukládá ani neodesílá. Zachována je možnost vrácení odstraněných částí, pokud jste mezitím text ručně nezměnili.
+- Dlaždice **+** má pod symbolem viditelnou verzi **1.8.15**. Verze je také v popisku tlačítka; kliknutí dál otevírá nastavení.
+
+Po aktualizaci obnovte Fyzion a otevřete zprávu znovu. V Modulech musí být zapnutá volba **Závěrečná zpráva bez termínů a pozdravu**. Před uložením zkontrolujte upravený obsah.
+
+Ověřeno na modelu skutečně poskytnutého formátu bez osobních údajů: české názvy měsíců, výpisy výkonů, samostatná data, zalomení BR, prostý text, vnořené bloky podpisu, klinická data, přenos do ukládaného modelu, tisk a viditelný údaj o verzi. Kontrolní PDF mělo jednu A4 a neobsahovalo odstraněný přehled ani celý podpisový závěr; bylo vizuálně zkontrolované.
+
+## Změny 1.8.14 — čištění zprávy přímo v editoru
+
+Dosavadní vynechání termínů se týkalo tiskové kopie. Nově se rozpoznaný přehled termínů návštěv a samostatný blok začínající **S pozdravem** odstraňují přímo v editoru vygenerované závěrečné zprávy. Úprava tak platí i pro následné **uložení PDF do karty** a **odeslání pacientovi**.
+
+- Upravuje se obsah rozpoznaného editoru závěrečné zprávy a jeho běžný vstupní model. Skript sám nic neukládá ani neodesílá; to dál provádí uživatel původními tlačítky Fyzionu.
+- Nález, průběh terapie a data obsažená v klinickém textu se zachovávají. Odstraňují se samostatné rozpoznané přehledy, nikoli libovolné zmínky o datu. Rozpoznání zahrnuje i výčty termínů bez roku.
+- Přímo u zprávy je volba **Odstranit termíny návštěv a „S pozdravem“**. Stejnou funkci lze vypnout v **+ → Moduly → Závěrečná zpráva bez termínů a pozdravu**. Výchozí stav je zapnuto.
+- Tlačítko **Vrátit odstraněné části** obnoví předchozí podobu, pokud jste mezitím text ručně neupravili, a vypne automatické čištění. Pozdější ruční změny automaticky nepřepisuje. Původní podoba zůstává pouze v paměti otevřené zprávy.
+- Volba úsporného tisku a velikost písma zůstávají samostatné. Nastavení se uchovává v tomto prohlížeči; není součástí staršího exportu nastavení.
+
+Po aktualizaci obnovte Fyzion a otevřete závěrečnou zprávu znovu. Před uložením zkontrolujte upravený obsah.
+
+Ověřeno na modelových datech: změna obsahu přímo v editoru, předání upraveného textu modelu před uložením a odesláním, zachování klinických dat, vrácení původního HTML, ochrana ručních změn a zapamatování vypnuté volby. Kontrolní vícestránkové PDF neobsahovalo přehled termínů ani pozdrav a identifikační hlavička byla jen jednou. PDF bylo vizuálně zkontrolované; živá zpráva pacienta nebyla použita.
+
+## Změny 1.8.13 — FT poukazy a závěrečná zpráva
+
+### Počet návštěv u FT poukazu
+
+V rozbaleném poukazu v sekci **Výkony** je pod Počtem výkonů také **Počet návštěv**. Počítají se jedinečné návštěvy, u kterých je zapsán alespoň jeden výkon tohoto FT. Více výkonů při jedné návštěvě se počítá jednou. Samotné naplánování termínu bez přiřazeného výkonu se nezapočítává.
+
+Data přebírá ze seznamu poukazů načteného Fyzionem; nezadává kvůli tomu další požadavky. Pokud jste skript aktualizovali v otevřené stránce, obnovte Fyzion a otevřete Výkony znovu. Při neúplných datech nebo nejednoznačné shodě poukazů zobrazí **Nelze ověřit** místo odhadovaného počtu. Datum poukazu se vyhodnocuje v časovém pásmu Europe/Prague. Údaje se neukládají do místního úložiště a při změně klienta se zahazují.
+
+### Kontrola 40 dní při příjmu poukazu
+
+Pod **Datem vystavení** v přidání či úpravě FT poukazu je počet dní od vystavení a poslední den 40denní lhůty pro první návštěvu. Počítá kalendářní dny od zadaného data; den vystavení je den 0 a 40. den je poslední v limitu.
+
+Při překročení, neplatném nebo budoucím datu zobrazí upozornění; při prázdném datu vyzve k jeho zadání. Jde o kontrolu vůči dnešku, nikoli o ověření, zda už první návštěva někdy proběhla. Uložení neblokuje a **Datum expirace** nemění.
+
+Obě nové funkce mají samostatné přepínače v **+ → Moduly**: **Počet návštěv u FT poukazu** a **Lhůta 40 dní při přijetí FT poukazu**. Jejich volby se ukládají samostatně v prohlížeči a nejsou součástí dosavadního exportu nastavení.
+
+### Úsporný tisk bez termínů a opakovaných hlaviček
+
+V tiskové kopii závěrečné zprávy se vynechá rozpoznaný samostatný přehled termínů návštěv: tabulka s termíny, seznam dat pod příslušným nadpisem nebo řádek Termíny návštěv s výčtem dat. Klinický text a data uvnitř nálezu či průběhu léčby zůstávají zachované. Neznámou nebo smíšenou strukturu skript automaticky nemaže.
+
+Hlavičky pacient/pracoviště v tabulkách se neopakují na dalších stranách. Opakované shodné bloky tiskové hlavičky se ponechají jen jednou. Úprava platí při zapnutém úsporném tisku a týká se pouze tiskové kopie. Uložený text, odeslání pacientovi a původní ukládání do karty se nemění.
+
+Ověření na modelových datech: jedinečné návštěvy, dva různé poukazy, nejednoznačné přiřazení, prázdná data, přenos UTC data do Prahy, fetch i XMLHttpRequest, přechod mezi klienty, přepínače po obnovení stránky a 40./41. den. V třístránkovém PDF se identifikační hlavička objevila právě jednou, přehled termínů chyběl a klinické údaje i poslední řádek zůstaly zachované. Tisk byl vizuálně zkontrolovaný. Do živého účtu se při testech nezapisovalo.
+
+## Změny 1.8.12 — úsporný tisk závěrečné zprávy
+
+Přímo u vygenerované závěrečné zprávy o léčbě je nová volba **Úsporný tisk závěrečné zprávy na A4**. Po aktualizaci skriptu obnovte Fyzion, otevřete závěrečnou zprávu a použijte její tlačítko **vytisknout**.
+
+- Výchozí písmo je 10,5 bodu, menší mezery a okraje 12 mm. Velikost lze změnit přímo u zprávy.
+- Tisková kopie se pokusí vejít na jednu A4 automatickým zmenšením nejvýše do minima 9 bodů. Pokud je obsah příliš dlouhý, pokračuje na více stranách; text se neořezává.
+- Zpráva se otevře v novém tiskovém okně. Běžně dlouhá zpráva rovnou vyvolá tiskový dialog; u příliš dlouhé zprávy lze tisk spustit tlačítkem v náhledu.
+- Volbu lze vypnout také přes **+ → Moduly → Úsporný tisk závěrečné zprávy (A4)**. Vypnutí vrátí původní tisk Fyzionu.
+- Tisková volba a velikost písma se pamatují samostatně v tomto prohlížeči; nejsou součástí dosavadního exportu nastavení.
+- Uložený text, tlačítko **uložit** pro PDF v kartě pacienta a odesílání pacientovi se nemění. Pro úsporné PDF použijte **vytisknout → Uložit jako PDF** v tiskovém dialogu.
+- Úprava je omezena na rozpoznaný editor vygenerované závěrečné zprávy. Nemění účtenky, rozpisy návštěv ani tisk jednotlivé návštěvy. U nepodporované vložené grafiky vyzve k použití původního tisku.
+
+Ověření na modelových datech: zpráva se vytiskla na 1 A4, záměrně dlouhá zpráva na 4 stránky a obsah včetně posledního řádku zůstal zachovaný. Ověřeno zapnutí/vypnutí, původní tisk ostatních dokumentů, nezměněný editor a ukládání. PDF byly vizuálně zkontrolované. Živá zpráva pacienta nebyla při testování použita.
+
+## Změny 1.8.11 — rozložení a ovládání modulů
+
+- Počítadlo FT poukazu je pod celým řádkem data a času; neubírá místo původním polím. Ověřeno při šířkách 320, 375, 768 a 1280 bodů.
+- Tlačítko **Zobrazit terapeuty** se na počítači plynule objeví po najetí myší na jeho místo pod výběrem terapeutů. Při otevřené nabídce a při zaměření klávesnicí zůstává viditelné. Na dotykovém zařízení je stále viditelné.
+- V **+ → Moduly** jsou samostatné přepínače **Počítadlo dní od vystavení FT poukazu v nové návštěvě**, **Skrývat tlačítko Zobrazit terapeuty do najetí myší** a **Lichý / sudý týden u data v kalendáři**. Výchozí stav všech tří je zapnuto.
+- Vypnutí skrývání ponechá tlačítko terapeutů stále viditelné. Celé zobrazení terapeutů má i nadále vlastní přepínač.
+- Vypnutí počítadla skryje pouze pomocný blok v nové návštěvě. Volba **První návštěva do 40 dní** ve Volných termínech má dál samostatné ovládání.
+- Volby se ukládají v tomto prohlížeči, přežijí obnovení stránky a jsou součástí exportu/importu nastavení. Starší nastavení nová pole doplní automaticky.
+
+Ověření: 17 místních testovacích sad včetně rozložení, myši, klávesnice, dotyku a obnovení nastavení po refreshi. Testy používají modelová data; nenahrazují kontrolu na živém účtu. Tato opravná verze zachovává funkce řady 1.8; verze 2.0 se připravuje samostatně.
 
 ## Instalace
 
@@ -14,7 +103,7 @@ Neoficiální desktopový pomocník pro [Fyzion](https://app.fyzion.cz/). Přid�
 4. Přihlaste se do Fyzionu a obnovte stránku.
 5. Otevřete kalendář terapeutů, aby se načetl jejich seznam a přihlášený přístup k dostupnosti.
 
-Průvodce instalací: https://bruhaedwin.github.io/Fyzion_upravy/
+Průvodce instalací: [Fyzion+ na GitHub Pages](https://bruhaedwin.github.io/Fyzion_upravy/).
 
 Ponechte aktivní pouze jednu kopii skriptu. Pokud prohlížeč vyžaduje zvláštní povolení uživatelských skriptů, povolte je podle pokynů Tampermonkey.
 
@@ -84,6 +173,18 @@ V **+ → Moduly → Zahrnout nepravidelnou pracovní dobu (přesčas)** je ve v
 
 Vypnutí přepínače omezí hledání, série, alternativy, náhled a závěrečné ověření před přípravou návštěvy na pravidelný rozvrh. Změna vymaže dosavadní výsledky. Volba se ukládá a přenáší exportem/importem nastavení.
 
+## Počítadlo lhůty ve formuláři návštěvy
+
+Pod skupinou Datum a čas v původním formuláři Fyzionu je pole **Vystavení FT poukazu** a počítadlo kalendářních dní od jeho vystavení do zvoleného data návštěvy. Přepočítává se i při ruční změně data.
+
+- V den vystavení ukazuje 0 dní; 40. den označí jako poslední den lhůty.
+- Od 41. dne zobrazí červené upozornění s počtem dní překročení.
+- U návštěvy před vystavením poukazu nebo při neplatném datu zobrazí upozornění. Při chybějícím datu vyzve k jeho doplnění.
+- Datum přebírá ze zadání Fyzion+ nebo z návrhu uchovaného v této kartě pouze při odpovídajícím klientovi. Jinak ho lze zadat přímo v počítadle. Při změně klienta se datum vymaže, aby se nepoužilo u jiné osoby.
+- U ověřeného klienta se ruční změna data vystavení promítne také do zadání Volných termínů a jeho obnovitelného návrhu.
+
+Jde o průběžné upozornění pro kontrolu **první návštěvy**, nikoli plošný zákaz ukládání návštěv. Další návštěvy série mohou být za 40denní hranicí. Počítadlo nemění datum ani čas návštěvy a návštěvu neukládá.
+
 ## Příprava návštěvy z karty klienta
 
 1. Otevřete kartu požadovaného klienta a klikněte na **Najít termín**.
@@ -104,7 +205,7 @@ Při nenalezené či nejednoznačné službě může skript doplnit ostatní úd
 
 Klienta předvyplňuje Fyzion, skript jej nepřepisuje. Existující formulář využije jen tehdy, pokud z něj dokáže ověřit odpovídající ID klienta. Jinak jej zavřete a spusťte přípravu znovu z karty. Změna klienta, stránky, formuláře nebo ruční interakce během přípravy operaci přeruší.
 
-Celkový limit přípravy je 60 sekund. Hledání má limit 90 sekund a načtení náhledu 30 sekund. Po chybě či zrušení mohou ve formuláři zůstat částečně doplněné údaje.
+Celkový limit přípravy je 120 sekund. Hledání má limit 180 sekund a načtení náhledu 60 sekund. Po chybě či zrušení mohou ve formuláři zůstat částečně doplněné údaje.
 
 ### Hlášky přípravy
 
@@ -171,24 +272,28 @@ Nastavení ani pomocný seznam nejsou odděleny podle účtu/pracoviště. Při 
 
 Při hlášení chyby uveďte verzi, postup a přesnou hlášku. Snímky anonymizujte; neposílejte přihlašovací údaje, hlavičky požadavků ani údaje pacientů.
 
-## Verze 1.8.8 stable a ověření
+## Verze 1.8.11 stable a ověření
 
 Vydáno 26. 10. 2026. Stabilní desktopové vydání navazuje na uživatelské ověření běžného hledání a přípravy návštěvy a na potvrzený nález termínu v přesčase v živém Fyzionu.
 
-Před vydáním prošly:
-
-- kontrola syntaxe a 160 porovnání výpočtu dostupnosti s nezávislým výpočtem na generovaných datech;
-- délky 15/30/45/60 minut, dělené směny, přesčasy, kolize a omezení dostupnosti klienta;
-- datum poukazu, prázdné/neplatné datum, hranice 40. dne, přestupný rok a změny času;
-- série, doplnění chybějícího termínu, alternativy, pravidla služeb a odmítnutí neúplných odpovědí;
-- integrační kontrola rozhraní v Chrome na simulovaných datech: hledání, přepínač přesčasů, uchování nastavení, série, chyba API, odkaz Návod, změna klienta a viditelnost výsledné chyby při vypnutých průběžných zprávách;
-- kontrola instalačního webu, aktuálního README a záložní dokumentace bez JavaScriptu.
 
 Označení stable neznamená ověření všech kombinací prohlížečů, pracovišť a služeb. Celý postup skutečného uložení návštěvy nebyl při této závěrečné kontrole automatizován v živém přihlášeném Fyzionu. Dostupnost místností a souběh návštěv klienta u jiných terapeutů nejsou ověřovány.
+
+### Změna 1.8.11 — počítadlo FT poukazu
+
+Počet kalendářních dní od vystavení FT poukazu přímo pod datem/časem návštěvy. Červené upozornění při překročení 40 dní, kontrola chybějících/neplatných dat a oddělení klientů. Prošlo 14 testovacích sad včetně testu nativního formuláře, změn dat a hranice 40./41. dne.
+
+### Změna 1.8.9 — rychlost a delší čekání
+
+Rychlejší přiřazování událostí terapeutům, průchod blokacemi a převody časů. Části období se načítají až třemi požadavky současně. V syntetickém měření na 12 terapeutech a 90 dnech byl místní výpočet přibližně 8.0× rychlejší při shodných výsledcích. Celková rychlost živého hledání závisí také na API.
+
+Limity: hledání/alternativy/doplnění 180 s, náhled 60 s, příprava návštěvy 120 s, ustálení formuláře 30 s. Kontrola čerstvosti zůstává dvě minuty; příliš stará data mohou být odmítnuta dříve. [Podrobnosti, měření a limity](VYKON-1.8.9.md).
 
 ### Změna 1.8.8 — audit a opravy
 
 Audit potvrdil a opravil tři hraniční chyby: odmítání návštěvy končící přesně o půlnoci při neomezeném konci dostupnosti klienta, automatické převádění neexistujícího data z API na jiný den a neobnovení levého spodního rohu při importu výchozí polohy.
+
+Prošlo všech 12 testovacích sad včetně nových regresních testů. Podrobnosti a rozsah ověření: [Audit 1.8.7 → 1.8.8](AUDIT-1.8.8.md). Závěrečná kontrola nevytvářela ani neukládala návštěvy v živém Fyzionu.
 
 ### Změna 1.8.7
 
@@ -228,18 +333,3 @@ Přidat termín doplňuje návštěvy výhradně na konec série. Ověřeno jedn
 - Viditelný konečný výsledek přípravy i při vypnutých průběžných hláškách.
 - Vymazání data poukazu a výsledků při změně klienta.
 - Popis v panelu odpovídá zapnutí či vypnutí přesčasů.
-- Sjednocené číslo verze, README a záložní dokumentace na instalačním webu.
-
-# Fyzion+ 2.0.0-beta.5
-
-Aktualizace bety 2.0.0-beta.4.
-
-- Vypnutý modul hlášek nyní odstraní plovoucí hlášení přípravy ze stránky. Nevkládá průběžné, závěrečné ani chybové okno a nezobrazuje ani text přípravy v panelu. Potlačení nezávisí na CSS stránky. Po opětovném zapnutí lze poslední výsledek zobrazit.
-- Změna přepínače se projeví ihned i v dalších otevřených kartách stejného prohlížeče. Přepínač lze dále ovládat během přípravy.
-- Tlačítko Zobrazit terapeuty zůstává na počítači viditelné při 60% krytí. Po najetí myší, při ovládání klávesnicí nebo otevřené nabídce je plně zvýrazněné. Na dotykovém zařízení zůstává plně viditelné.
-- Přepínač této vlastnosti se v Modulech → Terapeuti jmenuje Zjemnit tlačítko Zobrazit terapeuty mimo najetí myší. Původní nastavení zůstává zachované.
-- Výrazné zrychlení fungování skriptu
-
-V Tampermonkey aktualizujte existující Fyzion+ souborem fyzion-plus-beta-parallel.user.js. Ponechte jednu aktivní kopii a obnovte otevřené stránky Fyzionu.
-
-Jde stále o rozpracovanou verzi 2.0; plánované komplexní kontroly kolizí klienta/místnosti a přehled uložených návštěv série zatím nejsou dokončené.
