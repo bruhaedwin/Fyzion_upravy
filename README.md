@@ -10,12 +10,13 @@ Neoficiální desktopový pomocník pro [Fyzion](https://app.fyzion.cz/). Přid�
 
 V repozitáři jsou dvě samostatně instalovatelné varianty. Stav byl ověřen 29. 10. 2026 podle [revize eed69b2](https://github.com/bruhaedwin/Fyzion_upravy/tree/eed69b20a4ea311a2f0f634efba96cbea8cb0524).
 
+UPOZORNĚNÍ: Verze Fyzion+ 2 Beta nemusí vždy, z důvodu vývoje, odpovídat aktuálnínmu README.
+
 | Varianta | Instalace | Název v Tampermonkey |
 | --- | --- | --- |
 | **1.8.17 stable** | [fyzion-helper.user.js](https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js) | Fyzion+ |
 | **2.0.0-beta.5** | [fyzion-plus-beta-parallel.user.js](https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-plus-beta-parallel.user.js) | Fyzion+ 2.0 Beta |
 
-**Beta je rozpracované vydání řady 2.0. Vyšší číslo neznamená, že obsahuje všechny funkce současné stable 1.8.17.** Instalační odkazy sledují větev `main`; před potvrzením instalace zkontrolujte verzi v hlavičce skriptu.
 
 ### Instalace bety, přepínání a návrat
 
