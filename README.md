@@ -8,8 +8,6 @@ Neoficiální desktopový pomocník pro [Fyzion](https://app.fyzion.cz/). Přid�
 
 ## Výběr verze: stable 1.8.17 a Fyzion+ 2 Beta
 
-V repozitáři jsou dvě samostatně instalovatelné varianty. Stav byl ověřen 29. 10. 2026 podle [revize eed69b2](https://github.com/bruhaedwin/Fyzion_upravy/tree/eed69b20a4ea311a2f0f634efba96cbea8cb0524).
-
 UPOZORNĚNÍ: Verze Fyzion+ 2 Beta nemusí vždy, z důvodu vývoje, odpovídat aktuálnínmu README.
 
 | Varianta | Instalace | Název v Tampermonkey |
