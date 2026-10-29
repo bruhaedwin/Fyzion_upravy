@@ -6,6 +6,52 @@ Neoficiální desktopový pomocník pro [Fyzion](https://app.fyzion.cz/). Přid�
 
 > Skript návštěvy automaticky neukládá. Výsledky hledání nejsou rezervace. Před uložením vždy zkontrolujte klienta, službu, terapeuta, místnost, délku a datum s časem.
 
+## Výběr verze: stable 1.8.17 a Fyzion+ 2 Beta
+
+V repozitáři jsou dvě samostatně instalovatelné varianty. Stav byl ověřen 29. 10. 2026 podle [revize eed69b2](https://github.com/bruhaedwin/Fyzion_upravy/tree/eed69b20a4ea311a2f0f634efba96cbea8cb0524).
+
+| Varianta | Instalace | Název v Tampermonkey |
+| --- | --- | --- |
+| **1.8.17 stable** | [fyzion-helper.user.js](https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-helper.user.js) | Fyzion+ |
+| **2.0.0-beta.5** | [fyzion-plus-beta-parallel.user.js](https://raw.githubusercontent.com/bruhaedwin/Fyzion_upravy/main/fyzion-plus-beta-parallel.user.js) | Fyzion+ 2.0 Beta |
+
+**Beta je rozpracované vydání řady 2.0. Vyšší číslo neznamená, že obsahuje všechny funkce současné stable 1.8.17.** Instalační odkazy sledují větev `main`; před potvrzením instalace zkontrolujte verzi v hlavičce skriptu.
+
+### Instalace bety, přepínání a návrat
+
+1. Nainstalujte [Tampermonkey](https://www.tampermonkey.net/) do desktopového prohlížeče. Před přechodem exportujte nastavení přes **+ → Přenos na jiný počítač** a uschovejte dosavadní skript.
+2. Otevřete instalační odkaz bety z tabulky. Pokud se zobrazí jen kód, vytvořte v Tampermonkey nový skript, vložte celý obsah `fyzion-plus-beta-parallel.user.js` a uložte jej.
+3. Beta má odlišný název a namespace (`local.fyzion.helpers.beta`), proto může být nainstalovaná vedle stable (`local.fyzion.helpers`). **Zapněte vždy jen jednu variantu.** Zkontrolujte i případné starší ručně instalované kopie Fyzion+.
+4. Po instalaci, aktualizaci i každém přepnutí obnovte **všechny otevřené stránky Fyzionu**. Vypnutí skriptu v Tampermonkey neodstraní jeho již spuštěný kód z otevřené stránky.
+5. Přihlaste se do Fyzionu a otevřete kalendář terapeutů, aby se načetli terapeuti a přístup k dostupnosti. Původní styl ve Stylusu vypněte, pokud přepisuje vzhled userscriptu.
+
+Pro návrat vypněte betu, zapněte nebo znovu nainstalujte stable z tabulky a obnovte všechny stránky Fyzionu. Pokud je třeba, importujte zálohu nastavení odpovídající cílové verzi. Starší beta instalovaná jako běžný **Fyzion+** může být přepsána instalací stable; pro uchování obou variant použijte samostatný beta soubor výše.
+
+**Obě varianty sdílejí místní nastavení webu**, výběr a skrytí terapeutů i pomocné úložiště zadání; nejde o oddělené testovací prostředí. Změny nastavení bety se mohou projevit po návratu do stable. Export nenahrazuje zálohu skriptu, neobsahuje celé zadání hledání a kompatibilita novějšího exportu se starší verzí není zaručená. Nastavení není oddělené podle účtu či pracoviště.
+
+### Co publikovaná beta obsahuje
+
+Zachovává základní hledání volných termínů, přesčasy, blokace včetně oběda, dostupnost klienta, 40denní limit od data vystavení FT, návrhy sérií, alternativy, náhled, obnovu posledního zadání, přípravu návštěvy bez uložení a volitelné úpravy vzhledu. Platí délky 15/30/45/60 minut, rozsah 1–180 dní a časové pásmo Europe/Prague. Funkce jsou popsány v návodu níže; odlišnosti bety shrnuje tato tabulka.
+
+| Oblast | Chování v 2.0.0-beta.5 a rozdíl vůči stable 1.8.17 |
+| --- | --- |
+| Příprava návštěvy | Omezuje opakovaná čekání na již připravený formulář a zbytečné změny správně vybraných polí. Nezávislá čtení rozvrhu a událostí probíhají souběžně. Čerstvá kontrola dostupnosti zůstává před vyplněním i po něm; datum, čas a délka musí na konci zůstat správné tři sekundy. |
+| Přidat termín do série | Nabízí všechny vhodné dny v nastaveném rozsahu, bez dřívějšího omezení na prvních 12 časů. První den je rozbalený, časy dalších dnů se vytvoří po rozbalení. Doplňuje pouze za poslední datum série a zachovává alespoň jeden celý volný den mezi návštěvami i ostatní omezení zadání. |
+| Hlášky přípravy | Vypnutí **Zobrazovat hlášky přípravy návštěvy** potlačí průběžné, závěrečné i chybové okno a text přípravy v panelu. To se liší od původního popisu, podle kterého konečný výsledek a chyba zůstávají viditelné. Volbu lze změnit během přípravy, synchronizuje se mezi kartami stejného profilu. Po opětovném zapnutí lze zobrazit poslední dosud nezavřené hlášení. |
+| Terapeuti a moduly | Skupina **Terapeuti** je na konci Modulů. Volba **Zjemnit tlačítko Zobrazit terapeuty mimo najetí myší** ponechává na desktopu tlačítko při 60% krytí; myš, zaměření klávesnicí či otevřená nabídka jej zvýrazní. Na dotykovém zařízení je plně viditelné. Stable ve svém starším návodu popisuje úplné skrytí do najetí. |
+| FT a kalendář | Počítadlo dní od vystavení FT v nové návštěvě je pod řádkem data a času; má samostatný přepínač stejně jako lichý/sudý týden. Tyto funkce má také stable, nejsou výhradní novinkou bety. Počítadlo nenahrazuje samostatně zapínaný 40denní filtr hledání. |
+| Časové limity | Hledání, alternativy a doplnění série 180 s, náhled 60 s, příprava 120 s. Stejné hlavní limity má aktuální stable. Údaje 90/30/60 s ve starší části návodu jsou historické. Čerstvost výsledků zůstává dvě minuty; delší limit není prodloužením jejich platnosti ani povinným čekáním. |
+| Funkce novější stable | Beta.5 neobsahuje pozdější úsporný tisk a čištění závěrečné zprávy z řady 1.8.12–1.8.16, počet návštěv u FT ani kontrolu lhůty při příjmu FT z 1.8.13 a zobrazení verze uvnitř nastavení z 1.8.17. Příslušné kapitoly níže popisují stable. |
+
+### Omezení bety a postup při potížích
+
+- **Návštěvu ukládá uživatel původním tlačítkem Fyzionu.** Beta nezajišťuje hromadné uložení série ani přehled skutečně uložených návštěv série. Připravený formulář či návrh není rezervace.
+- Komplexní kontroly kolizí klienta u jiných terapeutů a dostupnosti místností nejsou zapojené do běžného hledání. Zdroj obsahuje dílčí pomocné funkce a podmíněné kontroly, ale běžné výsledky jim nepředávají potřebný kontext klienta/místnosti. Nelze je považovat za hotovou ochranu před těmito kolizemi.
+- Před uložením ověřte klienta, službu, terapeuta, místnost, délku, datum i čas. Pro 60 minut chybí automatické mapování služby; při nejednoznačné službě je nutný ruční výběr. Po přerušení mohou zůstat částečně doplněná pole.
+- Při vypnutých hláškách není absence chyby potvrzením úspěchu. Pro zjištění výsledku hlášky znovu zapněte. Během přípravy nezasahujte do formuláře; přepnutí hlášek je podporovaná výjimka.
+- Beta běží v přihlášené stránce Fyzionu a závisí na jeho rozhraní a API. Mobilní provoz ani všechny kombinace prohlížečů a pracovišť nejsou ověřené; test rozložení nebo dotykového ovládání tuto podporu nedokládá.
+
+
 ## Změny 1.8.17 — verze v okně nastavení
 
 Číslo verze se zobrazuje uvnitř otevřeného okna vedle nadpisu Nastavení Fyzion+. Růžová dlaždice zobrazuje pouze symbol +.
@@ -107,7 +153,7 @@ Průvodce instalací: [Fyzion+ na GitHub Pages](https://bruhaedwin.github.io/Fyz
 
 Ponechte aktivní pouze jednu kopii skriptu. Pokud prohlížeč vyžaduje zvláštní povolení uživatelských skriptů, povolte je podle pokynů Tampermonkey.
 
-### Aktualizace a návrat na předchozí verzi
+### Aktualizace 
 
 Otevřete instalační odkaz a potvrďte aktualizaci, nebo nahraďte celý obsah stávajícího skriptu. Uložte a obnovte Fyzion. Verze je uvedená v záhlaví panelu Volné termíny.
 
