@@ -10,7 +10,7 @@ Neoficiální desktopový pomocník pro [Fyzion](https://app.fyzion.cz/). Přid�
 
 Číslo verze se zobrazuje uvnitř otevřeného okna vedle nadpisu Nastavení Fyzion+. Růžová dlaždice zobrazuje pouze symbol +.
 
-## Změny 1.8.16 — samostatné výpisy výkonů
+## Změny 1.8.16 — čištění závěrečné zprávy
 
 Čištění závěrečné zprávy nově odstraní také samostatné administrativní řádky začínající **Výkony:**, které už nemají před sebou datum. Odstraní i žadatele v závorce, kódy výkonů, násobky, časy a diagnostické kódy v tomto výpisu.
 
